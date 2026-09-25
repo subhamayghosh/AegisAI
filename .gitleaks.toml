@@ -1,0 +1,25 @@
+# PromptShield gitleaks configuration.
+# Extends the built-in community ruleset and adds a rule for the Anthropic
+# API key prefix.
+
+title = "PromptShield gitleaks config"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API key (sk-ant-...)"
+regex = '''sk-ant-[A-Za-z0-9\-_]{20,}'''
+tags = ["key", "anthropic"]
+
+[allowlist]
+description = "Allowlist for placeholders and example files"
+paths = [
+    '''\.env\.example''',
+    '''\.gitleaks\.toml''',
+]
+regexes = [
+    '''sk-ant-REPLACE-ME''',
+    '''change-me-to-a-32-byte-random-string''',
+]

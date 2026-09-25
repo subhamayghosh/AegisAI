@@ -1,0 +1,6 @@
+# Progress Log
+
+2026-09-25 12:40  Deepak  Step 1 complete: repo scaffolded — directory tree, CLAUDE.md, skills, agents, rules, .env.example, .gitignore, .gitleaks.toml, .pre-commit-config.yaml, README, LICENSE
+2026-09-25 13:00  Deepak  Step 2 complete: FastAPI skeleton — pyproject.toml, requirements.txt, config.py, logging_.py, schemas.py, main.py, 7 stub API routers; /health test passes (3/3)
+2026-09-25 13:30  Deepak  Step 3 complete: DB layer — base.py (TypeDecorators: GUID/CIText/JSONBText/TZDateTime/IPAddress), session.py, models.py (5 tables + indexes), alembic.ini + env.py, initial migration generated; 8/8 unit tests pass; seed_db.py seeds admin + demo users. Note: bcrypt 5.x incompatible with passlib 1.7.4 — seed and future auth use bcrypt directly.
+2026-09-25 14:15  Deepak  Step 4 complete: Auth + Users + Settings — security/{passwords,jwt,deps,rate_limit}.py; api/{auth,users,settings}.py; config.py extended with WORKING_/JUDGE_MODEL_ALLOWLIST + resolve_model_ids helper; register/login/refresh(single-use rotation)/logout; PATCH /me rejects email 400; password change revokes refresh tokens; settings PUT validates model IDs against server-side allowlist with helpful 422 messages; available-models endpoint. 35/35 unit tests pass (12 auth + 6 users + 9 settings + 3 health + 5 models).

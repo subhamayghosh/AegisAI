@@ -216,3 +216,32 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- PromptShield ---
+# Secrets & env
+.env
+.env.*
+!.env.example
+
+# Databases
+*.db
+*.sqlite
+*.sqlite*
+
+# Node / Frontend
+node_modules/
+dist/
+build/
+.vite/
+
+# Keys & certs
+*.pem
+*.key
+id_rsa*
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
