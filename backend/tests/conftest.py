@@ -12,10 +12,34 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import StaticPool
 
+from promptshield.core import pipeline
 from promptshield.db.base import Base
 from promptshield.db.session import get_db
+from promptshield.llm import client as llm_client
 from promptshield.main import app
+from promptshield.schemas import SourceType, TierName, TierSignal
 from promptshield.security.rate_limit import limiter
+
+
+@pytest.fixture(autouse=True)
+def _isolate_external_services(monkeypatch, respx_mock):
+    """No test may load the embedding model or reach the Anthropic API.
+
+    Tier 2 is swapped for a benign stub (the real model needs a network
+    download at import). ``respx_mock`` blocks every outbound ``httpx`` call,
+    so an un-mocked judge request fails fast and degrades to
+    ``tier3_unavailable``; tests that need a verdict add a respx route.
+    """
+
+    async def _benign_tier2(text: str, source_type: SourceType) -> TierSignal:
+        return TierSignal(tier=TierName.tier2_semantic, flagged=False, confidence=0.0)
+
+    monkeypatch.setattr(pipeline._tier2, "detect", _benign_tier2)
+    monkeypatch.setattr(
+        llm_client,
+        "_judge_client",
+        llm_client.AsyncAnthropicClient(api_key="test-key", max_retries=0),
+    )
 
 
 @pytest_asyncio.fixture

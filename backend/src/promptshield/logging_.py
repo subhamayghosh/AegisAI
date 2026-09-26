@@ -9,9 +9,7 @@ import structlog
 _REDACT_RE = re.compile(r"password|token|api_key|authorization", re.IGNORECASE)
 
 
-def _redact_processor(
-    logger: object, method: str, event_dict: dict
-) -> dict:
+def _redact_processor(logger: object, method: str, event_dict: dict) -> dict:
     """structlog processor: replace sensitive key values with '***'."""
     return {k: "***" if _REDACT_RE.search(k) else v for k, v in event_dict.items()}
 
@@ -28,9 +26,11 @@ def configure_logging(log_level: str = "INFO") -> None:
             _redact_processor,
             structlog.processors.JSONRenderer(),
         ],
-        wrapper_class=structlog.BoundLogger,
+        # stdlib-backed loggers: add_logger_name needs a `.name`, and the level
+        # set by basicConfig below only filters when output goes through stdlib.
+        wrapper_class=structlog.stdlib.BoundLogger,
         context_class=dict,
-        logger_factory=structlog.PrintLoggerFactory(file=sys.stdout),
+        logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
     )
 

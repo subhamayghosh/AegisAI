@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
@@ -79,6 +79,12 @@ class FirewallRequest(BaseModel):
     text: str
     source_type: SourceType
     metadata: RequestMetadata = Field(default_factory=RequestMetadata)
+
+
+class ParsedInput(BaseModel):
+    text: str
+    source_type: SourceType
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 
 class TierSignal(BaseModel):
@@ -210,7 +216,7 @@ class AvailableModelsResponse(BaseModel):
 
 class InspectionOut(BaseModel):
     id: UUID
-    input_id: UUID
+    input_id: UUID | None = None
     session_id: UUID | None
     source_type: SourceType
     final_decision: Decision
@@ -228,6 +234,72 @@ class InspectionDetailOut(InspectionOut):
     reason: str
     working_model_id: str
     judge_model_id: str
+
+
+# ---------------------------------------------------------------------------
+# Sessions
+# ---------------------------------------------------------------------------
+
+
+class SessionSummaryOut(BaseModel):
+    session_id: UUID
+    turn_count: int
+    max_suspicion_score: float
+    started_at: datetime
+    last_activity_at: datetime
+
+
+class SessionTurnOut(BaseModel):
+    inspection_id: UUID
+    turn_id: int
+    source_type: SourceType
+    final_decision: Decision
+    attack_type: AttackType | None = None
+    session_suspicion_score: float
+    created_at: datetime
+
+
+class SessionDetailOut(BaseModel):
+    session_id: UUID
+    turns: list[SessionTurnOut]
+
+
+# ---------------------------------------------------------------------------
+# Admin — observability + audit log
+# ---------------------------------------------------------------------------
+
+
+class MetricsOut(BaseModel):
+    total: int = 0
+    allowed: int = 0
+    blocked: int = 0
+    neutralized: int = 0
+    by_attack_type: dict[str, int] = Field(default_factory=dict)
+    by_source_type: dict[str, int] = Field(default_factory=dict)
+
+
+class EventOut(BaseModel):
+    timestamp: datetime
+    input_hash: str
+    decision: Decision
+    attack_type: AttackType | None = None
+    source_type: SourceType
+    latency_ms: int
+    user_id: str | None = None
+
+
+class AuditLogOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    user_id: UUID | None = None
+    event_type: str
+    ip_address: str | None = None
+    user_agent: str | None = None
+    input_hash: str | None = None
+    decision: str | None = None
+    metadata_: dict[str, Any] | None = Field(default=None, serialization_alias="metadata")
+    created_at: datetime
 
 
 # ---------------------------------------------------------------------------

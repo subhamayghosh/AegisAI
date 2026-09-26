@@ -122,8 +122,12 @@ class TZDateTime(types.TypeDecorator):
         return dialect.type_descriptor(types.DateTime(timezone=True))
 
     def process_bind_param(self, value: Any, dialect: Any) -> Any:
-        if value is not None and isinstance(value, datetime) and value.tzinfo is None:
-            return value.replace(tzinfo=timezone.utc)
+        if value is not None and isinstance(value, datetime):
+            if value.tzinfo is None:
+                return value.replace(tzinfo=timezone.utc)
+            # SQLite stores the wall-clock digits and drops the offset, so a
+            # non-UTC value would compare as the wrong instant.
+            return value.astimezone(timezone.utc)
         return value
 
     def process_result_value(self, value: Any, dialect: Any) -> Any:

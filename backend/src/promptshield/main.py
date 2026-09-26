@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -8,16 +11,27 @@ from slowapi.errors import RateLimitExceeded
 
 from promptshield.api import admin, auth, firewall, history, sessions, settings, users
 from promptshield.config import get_settings
+from promptshield.core import pipeline
 from promptshield.logging_ import configure_logging
 from promptshield.security.rate_limit import limiter
 
 _settings = get_settings()
 configure_logging(_settings.log_level)
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    # Load the Tier 2 model in the background at startup so the first
+    # inspections don't pay for it.
+    pipeline.warm_up()
+    yield
+
+
 app = FastAPI(
     title="PromptShield",
     version=_settings.app_version,
     description="Agentic prompt-injection firewall",
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter

@@ -129,6 +129,7 @@ class Inspection(Base):
         GUID, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     session_id: Mapped[uuid.UUID] = mapped_column(GUID, nullable=False)
+    input_id: Mapped[uuid.UUID | None] = mapped_column(GUID, nullable=True)
     turn_id: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     source_type: Mapped[str] = mapped_column(Text, nullable=False)
     input_hash: Mapped[str] = mapped_column(Text, nullable=False)

@@ -16,6 +16,22 @@ output, and full auditability.
 cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
+
+# The image parser (backend/src/promptshield/parsers/image.py) shells out to
+# the tesseract OCR binary via pytesseract — install it separately:
+#   Debian/Ubuntu: apt-get install tesseract-ocr
+#   macOS:         brew install tesseract
+#   Windows:       https://github.com/UB-Mannheim/tesseract/wiki
+# Without it, image-source-type inspections raise TesseractNotFoundError and
+# the corresponding unit test (test_image_parser_ocr_extracts_injection_text)
+# is skipped rather than failed.
+
+# The Tier 2 semantic detector (backend/src/promptshield/tiers/tier2_semantic.py)
+# downloads sentence-transformers/all-MiniLM-L6-v2 (~90MB) from Hugging Face
+# on first import, then caches it under ~/.cache/huggingface — it needs
+# network access to huggingface.co exactly once. On a machine/proxy that
+# blocks that host, importing the module (and therefore
+# tests/unit/tiers/test_tier2.py and scripts/tune_tier2_thresholds.py) fails.
 cp ../.env.example ../.env         # fill in ANTHROPIC_API_KEY
 alembic upgrade head
 python ../scripts/seed_db.py
