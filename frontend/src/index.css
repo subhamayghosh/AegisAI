@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+[data-theme="light"] {
+  --color-bg: 248 250 252;
+  --color-surface: 255 255 255;
+  --color-surface-alt: 241 245 249;
+  --color-border: 226 232 240;
+  --color-text: 15 23 42;
+  --color-text-muted: 100 116 139;
+  --color-primary: 79 70 229;
+  --color-primary-hover: 67 56 202;
+  --color-allow: 22 101 52;
+  --color-allow-bg: 220 252 231;
+  --color-neutralize: 146 64 14;
+  --color-neutralize-bg: 254 243 199;
+  --color-block: 153 27 27;
+  --color-block-bg: 254 226 226;
+}
+
+[data-theme="dark"] {
+  --color-bg: 8 12 20;
+  --color-surface: 17 24 39;
+  --color-surface-alt: 30 41 59;
+  --color-border: 51 65 85;
+  --color-text: 241 245 249;
+  --color-text-muted: 148 163 184;
+  --color-primary: 129 140 248;
+  --color-primary-hover: 165 180 252;
+  --color-allow: 134 239 172;
+  --color-allow-bg: 20 45 30;
+  --color-neutralize: 253 224 71;
+  --color-neutralize-bg: 55 44 8;
+  --color-block: 252 165 165;
+  --color-block-bg: 55 20 20;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-bg text-text font-sans antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid rgb(var(--color-primary));
+  outline-offset: 2px;
+}
