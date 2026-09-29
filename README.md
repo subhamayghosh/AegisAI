@@ -75,11 +75,11 @@ Equivalent raw compose commands (what the `Makefile` targets wrap) are in
 
 There is one login screen, not a separate unprotected admin portal. Seed the
 demo users, then sign in as `admin@promptshield.dev` with the value of
-`SEED_ADMIN_PASSWORD` in your local `.env`. The default shown only in
-`.env.example` is for local development; change it before any shared run.
-Open the account menu and select **Audit Log** (or visit `/audit`). The seed
-script also creates `demo@promptshield.dev` with password `DemoPass123!`
-as a non-admin account for comparison.
+`SEED_ADMIN_PASSWORD` in your untracked local `.env`. That value is
+intentionally omitted from `.env.example`; choose a unique local credential
+before any shared run. Open the account menu and select **Audit Log** (or
+visit `/audit`). The seed script also creates a local non-admin demo account
+for comparison.
 
 ## Local dev (no Docker)
 
