@@ -65,4 +65,21 @@ describe("Login", () => {
       expect(screen.getByText("Dashboard Home")).toBeInTheDocument()
     );
   });
+
+  it("explains why a legacy local-domain email was rejected", async () => {
+    authApi.login.mockRejectedValue({ response: { status: 422 } });
+    renderLogin();
+
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: "admin@promptshield.local" },
+    });
+    fireEvent.change(screen.getByLabelText(/password/i), {
+      target: { value: "password1" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
+
+    expect(
+      await screen.findByText("Enter a valid email address. Local demo accounts use @promptshield.dev.")
+    ).toBeInTheDocument();
+  });
 });

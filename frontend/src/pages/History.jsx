@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { Inbox, Plus } from "lucide-react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Inbox, Loader2, Plus, RotateCcw, Trash2 } from "lucide-react";
 import * as historyApi from "../api/history";
 import DecisionPill from "../components/DecisionPill";
 import { ATTACK_TYPES, DECISIONS, SOURCE_TYPES } from "../constants";
+import { useToast } from "../hooks/useToast";
 
 const PAGE_SIZE = 25;
 
@@ -12,8 +13,11 @@ const DEFAULT_FILTERS = { from: "", to: "", decision: "", attack_type: "", sourc
 
 export default function History() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const toast = useToast();
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
   const [page, setPage] = useState(1);
+  const [confirmingReset, setConfirmingReset] = useState(false);
 
   const params = useMemo(
     () => ({
@@ -31,6 +35,31 @@ export default function History() {
   const { data, isLoading } = useQuery({
     queryKey: ["history", params],
     queryFn: () => historyApi.listHistory(params),
+  });
+
+  const refreshHistory = () => {
+    queryClient.invalidateQueries({ queryKey: ["history"] });
+    queryClient.invalidateQueries({ queryKey: ["sessions"] });
+  };
+
+  const clearMutation = useMutation({
+    mutationFn: historyApi.clearHistory,
+    onSuccess: ({ deleted_count: deletedCount }) => {
+      setConfirmingReset(false);
+      setPage(1);
+      refreshHistory();
+      toast.success(`Cleared ${deletedCount} inspection${deletedCount === 1 ? "" : "s"} from your history.`);
+    },
+    onError: () => toast.error("Could not clear your history. Please try again."),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: historyApi.deleteHistoryItem,
+    onSuccess: () => {
+      refreshHistory();
+      toast.success("Inspection removed from your history.");
+    },
+    onError: () => toast.error("Could not remove that inspection. Please try again."),
   });
 
   const updateFilter = (key) => (e) => {
@@ -126,7 +155,30 @@ export default function History() {
             ))}
           </select>
         </div>
+        <button
+          type="button"
+          disabled={total === 0 || clearMutation.isPending}
+          onClick={() => setConfirmingReset(true)}
+          className="ml-auto inline-flex items-center gap-2 rounded-xl border border-block/35 bg-blockBg/40 px-3 py-2 text-sm font-medium text-block transition hover:bg-blockBg disabled:cursor-not-allowed disabled:opacity-45"
+        >
+          <RotateCcw size={15} aria-hidden="true" /> Reset history
+        </button>
       </div>
+
+      {confirmingReset && (
+        <div role="alertdialog" aria-labelledby="reset-history-title" className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-block/35 bg-blockBg/45 px-4 py-3">
+          <div>
+            <p id="reset-history-title" className="text-sm font-semibold">Reset all of your inspection history?</p>
+            <p className="mt-0.5 text-xs text-textMuted">This removes your inspection records and session scores. The hash-only admin audit trail remains.</p>
+          </div>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setConfirmingReset(false)} className="rounded-xl border border-border bg-surface px-3 py-1.5 text-sm">Cancel</button>
+            <button type="button" onClick={() => clearMutation.mutate()} disabled={clearMutation.isPending} className="inline-flex items-center gap-2 rounded-xl bg-block px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-60">
+              {clearMutation.isPending && <Loader2 size={15} className="animate-spin" aria-hidden="true" />} Clear history
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="rounded-card border border-border bg-surface">
         {isEmpty ? (
@@ -151,6 +203,7 @@ export default function History() {
                   <th className="px-4 py-2 font-medium">Attack type</th>
                   <th className="px-4 py-2 font-medium">Decision</th>
                   <th className="px-4 py-2 text-right font-medium">Latency</th>
+                  <th className="px-4 py-2 text-right font-medium"><span className="sr-only">Actions</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -170,6 +223,20 @@ export default function History() {
                     </td>
                     <td className="px-4 py-2 text-right text-xs text-textMuted">
                       {item.latency_ms_total} ms
+                    </td>
+                    <td className="px-4 py-2 text-right">
+                      <button
+                        type="button"
+                        aria-label={`Delete inspection from ${new Date(item.created_at).toLocaleString()}`}
+                        disabled={deleteMutation.isPending}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          deleteMutation.mutate(item.id);
+                        }}
+                        className="rounded-lg p-1.5 text-textMuted transition hover:bg-blockBg hover:text-block disabled:opacity-45"
+                      >
+                        {deleteMutation.isPending ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : <Trash2 size={15} aria-hidden="true" />}
+                      </button>
                     </td>
                   </tr>
                 ))}

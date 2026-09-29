@@ -7,6 +7,8 @@ import pytest
 from sqlalchemy import select
 
 from promptshield.db.models import Inspection, User
+from promptshield.core import session_tracker
+from promptshield.schemas import TierName, TierSignal
 from tests.conftest import auth_headers, register_user
 
 BASE_TIME = datetime(2026, 9, 20, 12, 0, tzinfo=UTC)
@@ -145,6 +147,35 @@ async def test_history_detail_returns_signals_and_hides_other_users_rows(
 
 async def test_history_requires_authentication(client) -> None:
     assert (await client.get("/history")).status_code == 401
+
+
+async def test_history_delete_is_user_scoped_and_clear_resets_only_the_callers_scores(
+    client, db, alice, bob
+) -> None:
+    own_session = uuid.uuid4()
+    own = _inspection(alice["id"], 0, session_id=own_session)
+    other = _inspection(bob["id"], 1)
+    remaining = _inspection(alice["id"], 2)
+    db.add_all([own, other, remaining])
+    await db.commit()
+
+    signal = TierSignal(tier=TierName.tier1_heuristic, flagged=True, confidence=0.8)
+    session_tracker.update(f"{alice['id']}:{own_session}", [signal])
+    session_tracker.update(f"{bob['id']}:{other.session_id}", [signal])
+
+    deleted = await client.delete(f"/history/{own.id}", headers=alice["headers"])
+    foreign = await client.delete(f"/history/{other.id}", headers=alice["headers"])
+    cleared = await client.delete("/history", headers=alice["headers"])
+
+    assert deleted.status_code == 200
+    assert deleted.json() == {"deleted_count": 1}
+    assert foreign.status_code == 404
+    assert cleared.status_code == 200
+    assert cleared.json() == {"deleted_count": 1}
+    assert (await client.get("/history", headers=alice["headers"])).json()["total"] == 0
+    assert (await client.get("/history", headers=bob["headers"])).json()["total"] == 1
+    assert session_tracker.get_score(f"{alice['id']}:{own_session}") == 0.0
+    assert session_tracker.get_score(f"{bob['id']}:{other.session_id}") > 0.0
 
 
 # ---------------------------------------------------------------------------

@@ -59,14 +59,14 @@ export default function HistoryDetail() {
           </span>
         </div>
 
-        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 text-sm md:grid-cols-4">
           <div>
             <dt className="text-xs text-textMuted">Source type</dt>
             <dd>{item.source_type}</dd>
           </div>
-          <div>
+          <div className="col-span-2 md:col-span-2">
             <dt className="text-xs text-textMuted">Input hash</dt>
-            <dd className="font-mono text-xs">{item.input_hash}</dd>
+            <dd className="break-all font-mono text-xs leading-relaxed">{item.input_hash}</dd>
           </div>
           <div>
             <dt className="text-xs text-textMuted">Latency</dt>

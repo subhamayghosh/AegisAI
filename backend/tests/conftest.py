@@ -4,7 +4,7 @@ from typing import AsyncIterator
 
 import pytest
 import pytest_asyncio
-from httpx2 import ASGITransport, AsyncClient
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -35,6 +35,10 @@ def _isolate_external_services(monkeypatch, respx_mock):
         return TierSignal(tier=TierName.tier2_semantic, flagged=False, confidence=0.0)
 
     monkeypatch.setattr(pipeline._tier2, "detect", _benign_tier2)
+    # Client fixtures drive the real app lifespan.  Do not let its startup
+    # hook download the embedding model during isolated unit/integration/E2E
+    # tests; scenarios that need Tier 2 provide their own deterministic stub.
+    monkeypatch.setattr(pipeline, "warm_up", lambda: None)
     monkeypatch.setattr(
         llm_client,
         "_judge_client",
@@ -102,9 +106,10 @@ async def client(db_engine) -> AsyncIterator[AsyncClient]:
     limiter.enabled = False
     _reset_limiter_storage()
 
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
-        yield ac
+    async with app.router.lifespan_context(app):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
+            yield ac
 
     limiter.enabled = previous_enabled
     app.dependency_overrides.clear()
@@ -125,9 +130,10 @@ async def rl_client(db_engine) -> AsyncIterator[AsyncClient]:
     limiter.enabled = True
     _reset_limiter_storage()
 
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
-        yield ac
+    async with app.router.lifespan_context(app):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
+            yield ac
 
     limiter.enabled = previous_enabled
     _reset_limiter_storage()

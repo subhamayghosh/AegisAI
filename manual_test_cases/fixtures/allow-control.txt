@@ -1,0 +1,3 @@
+Please summarize this project update in three concise bullet points:
+the October release is on schedule, regression testing starts next week,
+and the product owner will review the demo on Friday.

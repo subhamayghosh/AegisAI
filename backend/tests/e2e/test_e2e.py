@@ -3,13 +3,13 @@ auth, every firewall decision path, history, password change, admin audit,
 and per-user model selection — in one continuous session, plus an isolated
 smoke test that boots the real FastAPI lifespan.
 
-Reuses the `client`/`db` fixtures from tests/conftest.py (ASGITransport bound
-to a fresh in-memory SQLite DB, rate limiting disabled) — the same "fresh
-test server per test" pattern already proven across tests/integration/. Tier
-2 is stubbed benign by the autouse `_isolate_external_services` fixture
-(overridden locally where a scenario needs Tier 2 to flag); Tier 3 calls are
-routed through one respx mock keyed by distinctive substrings in each
-scenario's text, since a single long journey can't rely on call-order.
+Reuses the `client`/`db` fixtures from tests/conftest.py (httpx ASGITransport
+bound to a fresh in-memory SQLite DB, with the FastAPI lifespan entered and
+rate limiting disabled). Tier 2 is stubbed benign by the autouse
+`_isolate_external_services` fixture (overridden locally where a scenario
+needs Tier 2 to flag); Tier 3 calls are routed through one respx mock keyed
+by distinctive substrings in each scenario's text, since a single long
+journey can't rely on call-order.
 """
 
 from __future__ import annotations
@@ -393,19 +393,13 @@ async def test_model_selection_end_to_end(client, db, respx_mock: respx.MockRout
 
 
 # ---------------------------------------------------------------------------
-# A genuinely fresh ASGI server with real lifespan events, for the one
-# smoke check that specifically needs startup/shutdown to run (Tier 2's
-# warm_up() background thread) rather than the conftest ASGITransport
-# fixtures, which never trigger FastAPI's lifespan context.
+# A direct lifespan smoke check complements the lifespan-backed shared client
+# fixture, proving the application can also be booted independently.
 # ---------------------------------------------------------------------------
 
 
 async def test_app_boots_with_real_lifespan(monkeypatch) -> None:
-    """Boots the actual app lifespan (startup/shutdown) once, confirming
-    /health responds — the rest of this file intentionally reuses the
-    lighter conftest fixtures for every stateful scenario. No extra
-    dependency needed: Starlette exposes the lifespan context directly.
-    """
+    """Boot the application independently and confirm /health responds."""
     monkeypatch.setattr(pipeline, "warm_up", lambda: None)
 
     async with app.router.lifespan_context(app):

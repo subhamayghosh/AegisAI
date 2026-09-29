@@ -33,8 +33,8 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     claude_working_model: str = "claude-sonnet-5"
     claude_judge_model: str = "claude-opus-4-7"
-    claude_timeout_s: int = 5
-    claude_max_retries: int = 2
+    claude_timeout_s: int = 12
+    claude_max_retries: int = 0
 
     # Tier thresholds
     tier2_threshold: float = 0.75

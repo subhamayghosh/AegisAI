@@ -2,12 +2,15 @@
 
 Run from the repo root:
     cd backend && python ../scripts/seed_db.py
+    # Recover the local seeded admin using SEED_ADMIN_PASSWORD from .env:
+    python ../scripts/seed_db.py --reset-admin-password
 
 Reads DATABASE_URL and SEED_ADMIN_PASSWORD from the environment / .env file.
 """
 from __future__ import annotations
 
 import asyncio
+import argparse
 import os
 import sys
 
@@ -26,6 +29,15 @@ from promptshield.db.base import Base
 from promptshield.db.models import User, UserSettings
 
 
+# ``email-validator`` (used by Pydantic's EmailStr) rejects reserved .local
+# addresses before an authentication attempt reaches the password check. Keep
+# this migration so existing local demo databases remain usable after upgrading.
+LEGACY_SEEDED_EMAILS = {
+    "admin@promptshield.dev": "admin@promptshield.local",
+    "demo@promptshield.dev": "demo@promptshield.local",
+}
+
+
 def _hash(password: str) -> str:
     return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt(rounds=12)).decode()
 
@@ -36,9 +48,19 @@ async def _upsert_user(
     password: str,
     display_name: str,
     role: str,
+    reset_existing_password: bool = False,
 ) -> User:
     result = await session.execute(select(User).where(User.email == email.lower()))
     user = result.scalar_one_or_none()
+    migrated_legacy_user = False
+
+    if user is None and (legacy_email := LEGACY_SEEDED_EMAILS.get(email)):
+        legacy_result = await session.execute(select(User).where(User.email == legacy_email))
+        user = legacy_result.scalar_one_or_none()
+        if user is not None:
+            user.email = email
+            migrated_legacy_user = True
+            print(f"  Migrated {role} sign-in: {legacy_email} -> {email}")
 
     if user is None:
         user = User(
@@ -54,13 +76,20 @@ async def _upsert_user(
         session.add(settings)
 
         print(f"  Created {role}: {email}")
-    else:
+    elif reset_existing_password:
+        # This is deliberately opt-in and is used only for the local seeded
+        # admin. Incrementing the version immediately invalidates any access
+        # tokens created with the old password.
+        user.password_hash = _hash(password)
+        user.token_version += 1
+        print(f"  Reset password for {role}: {email}")
+    elif not migrated_legacy_user:
         print(f"  Already exists, skipping: {email}")
 
     return user
 
 
-async def main() -> None:
+async def main(reset_admin_password: bool = False) -> None:
     s = get_settings()
     admin_password = s.seed_admin_password
 
@@ -76,14 +105,15 @@ async def main() -> None:
     async with async_session() as session:
         await _upsert_user(
             session,
-            email="admin@promptshield.local",
+            email="admin@promptshield.dev",
             password=admin_password,
             display_name="Admin",
             role="admin",
+            reset_existing_password=reset_admin_password,
         )
         await _upsert_user(
             session,
-            email="demo@promptshield.local",
+            email="demo@promptshield.dev",
             password="DemoPass123!",
             display_name="Demo User",
             role="user",
@@ -95,4 +125,11 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description="Seed PromptShield's local demo accounts.")
+    parser.add_argument(
+        "--reset-admin-password",
+        action="store_true",
+        help="reset the existing seeded admin to SEED_ADMIN_PASSWORD from .env",
+    )
+    args = parser.parse_args()
+    asyncio.run(main(reset_admin_password=args.reset_admin_password))

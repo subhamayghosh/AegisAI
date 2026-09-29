@@ -4,15 +4,17 @@ import uuid
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from promptshield.db.models import Inspection, User
 from promptshield.db.session import get_db
+from promptshield.core import session_tracker
 from promptshield.schemas import (
     AttackType,
     Decision,
     InspectionDetailOut,
+    HistoryDeleteOut,
     InspectionOut,
     Page,
     SourceType,
@@ -81,6 +83,18 @@ async def list_history(
     )
 
 
+@router.delete("", response_model=HistoryDeleteOut)
+async def clear_history(
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> HistoryDeleteOut:
+    """Delete the caller's inspection history, never the administrative audit log."""
+    result = await db.execute(delete(Inspection).where(Inspection.user_id == user.id))
+    await db.commit()
+    session_tracker.reset_for_user(user.id)
+    return HistoryDeleteOut(deleted_count=result.rowcount or 0)
+
+
 @router.get("/{inspection_id}", response_model=InspectionDetailOut)
 async def get_history_item(
     inspection_id: uuid.UUID,
@@ -106,3 +120,25 @@ async def get_history_item(
         working_model_id=row.working_model_id,
         judge_model_id=row.judge_model_id,
     )
+
+
+@router.delete("/{inspection_id}", response_model=HistoryDeleteOut)
+async def delete_history_item(
+    inspection_id: uuid.UUID,
+    user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> HistoryDeleteOut:
+    row = (
+        await db.execute(
+            select(Inspection).where(Inspection.id == inspection_id, Inspection.user_id == user.id)
+        )
+    ).scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Inspection not found")
+
+    session_id = row.session_id
+    await db.delete(row)
+    await db.commit()
+    if session_id is not None:
+        session_tracker.reset(f"{user.id}:{session_id}")
+    return HistoryDeleteOut(deleted_count=1)

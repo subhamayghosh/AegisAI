@@ -94,6 +94,10 @@ sources per Appendix A) — each module has its own tiny `_to_bytes` helper.
   - Logs `pipeline_over_latency_budget` when a request exceeds 2000 ms.
 - `/history` and `/sessions` always filter by `user_id`; another user's
   inspection or session returns the same 404 as a missing one.
+- A user may `DELETE /history` to clear only their Inspection rows or
+  `DELETE /history/{inspection_id}` to clear one owned record. Neither route
+  deletes audit rows (the audit log is a separate, hash-only compliance
+  trail); both reset only the caller's in-memory session-score state.
 - Tests: `tests/conftest.py` has an autouse `_isolate_external_services`
   fixture that stubs Tier 2 and activates `respx_mock`, so no test loads the
   embedding model or reaches Anthropic. An un-mocked judge call fails fast

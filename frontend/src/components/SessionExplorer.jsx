@@ -23,9 +23,9 @@ export default function SessionExplorer({ session, turns }) {
       </div>
 
       <div className="relative mt-4">
-        <div className="h-2 rounded-full bg-surfaceAlt">
+        <div className="h-2.5 rounded-full bg-surfaceAlt">
           <div
-            className={`h-full rounded-full ${score >= THRESHOLD ? "bg-block" : "bg-primary"}`}
+            className={`h-full rounded-full ${score >= THRESHOLD ? "bg-block" : "bg-gradient-to-r from-primary to-cyan-400"}`}
             style={{ width: `${score * 100}%` }}
           />
         </div>

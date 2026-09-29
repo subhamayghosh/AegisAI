@@ -15,9 +15,9 @@ export default function Nav() {
           key={to}
           to={to}
           className={({ isActive }) =>
-            `rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+            `rounded-xl px-3 py-2 text-sm font-medium transition-all ${
               isActive
-                ? "bg-primary/10 text-primary"
+                ? "bg-primary/10 text-primary shadow-sm"
                 : "text-textMuted hover:bg-surfaceAlt hover:text-text"
             }`
           }

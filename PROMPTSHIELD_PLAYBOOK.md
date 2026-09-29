@@ -1100,8 +1100,8 @@ password_hash is not None and email is lower-cased at insert time (add
 a listener/validator to enforce that).
 
 Add scripts/seed_db.py — creates one admin user (email
-admin@promptshield.local, password from env SEED_ADMIN_PASSWORD) and
-one demo user (demo@promptshield.local / DemoPass123!).
+admin@promptshield.dev, password from env SEED_ADMIN_PASSWORD) and
+one demo user (demo@promptshield.dev / DemoPass123!).
 ```
 
 **Housekeeping:**
