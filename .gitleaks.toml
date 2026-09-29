@@ -1,8 +1,8 @@
-# PromptShield gitleaks configuration.
+# AegisAI gitleaks configuration.
 # Extends the built-in community ruleset and adds a rule for the Anthropic
 # API key prefix.
 
-title = "PromptShield gitleaks config"
+title = "AegisAI gitleaks config"
 
 [extend]
 useDefault = true

@@ -1,4 +1,4 @@
-# PromptShield manual demo kit
+# AegisAI manual demo kit
 
 This folder is a safe, repeatable way to understand and demonstrate the
 **Inspect** screen. Every sample is synthetic. Do not replace its fake tokens,
@@ -6,7 +6,7 @@ domains, or prompts with real credentials or production data.
 
 ## What the app does
 
-PromptShield is a firewall placed **before** an LLM agent. It does not execute
+AegisAI is a firewall placed **before** an LLM agent. It does not execute
 the submitted instruction. Instead, it parses the declared source, runs three
 independent detection tiers, applies policy, and records a privacy-preserving
 event.
@@ -31,7 +31,8 @@ For the recommended realistic live demonstration, use the **Load probe**
 button in Inspect. It loads a complex input that intentionally avoids Tier 1's
 high-confidence short-circuit and therefore produces a Tier 1, Tier 2, and
 Tier 3 signal card. See the dedicated
-[`complex scenarios`](./complex_scenarios/README.md) guide.
+[`complex scenarios`](./complex_scenarios/README.md) guide and the
+[live demo runbook](./LIVE_DEMO_RUNBOOK.md).
 
 For Tier 2 scenarios, wait for the semantic model to warm up. For Tier 3
 scenarios, an `ANTHROPIC_API_KEY` and a permitted judge model are required.
@@ -103,7 +104,7 @@ be `ALLOW` while the Tier 1 signal is present.
 
 Run [`allow-control.txt`](./fixtures/allow-control.txt) as **User message**.
 Expected result: `ALLOW`, no flagged tier, no attack type. This demonstrates
-that PromptShield distinguishes ordinary requests from adversarial ones.
+that AegisAI distinguishes ordinary requests from adversarial ones.
 
 ## Full regression evidence
 

@@ -71,7 +71,7 @@ describe("Login", () => {
     renderLogin();
 
     fireEvent.change(screen.getByLabelText(/email/i), {
-      target: { value: "admin@promptshield.local" },
+      target: { value: "admin@aegisai.local" },
     });
     fireEvent.change(screen.getByLabelText(/password/i), {
       target: { value: "password1" },
@@ -79,7 +79,7 @@ describe("Login", () => {
     fireEvent.click(screen.getByRole("button", { name: /sign in/i }));
 
     expect(
-      await screen.findByText("Enter a valid email address. Local demo accounts use @promptshield.dev.")
+      await screen.findByText("Enter a valid email address. Local demo accounts use @aegisai.dev.")
     ).toBeInTheDocument();
   });
 });

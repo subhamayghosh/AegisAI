@@ -19,8 +19,8 @@ _src = os.path.join(_here, "..", "backend", "src")
 if _src not in sys.path:
     sys.path.insert(0, _src)
 
-from promptshield.schemas import SourceType  # noqa: E402
-from promptshield.tiers import tier2_semantic  # noqa: E402
+from aegisai.schemas import SourceType  # noqa: E402
+from aegisai.tiers import tier2_semantic  # noqa: E402
 
 THRESHOLDS = [0.60, 0.65, 0.70, 0.75, 0.80]
 _MASTER_JSON = os.path.join(_here, "..", "test_corpus", "master.json")

@@ -1,7 +1,7 @@
-# Backend Agent — PromptShield
+# Backend Agent — AegisAI
 
-You are the backend specialist. Scope: `backend/src/promptshield/api/`,
-`backend/src/promptshield/security/`, `backend/src/promptshield/db/`.
+You are the backend specialist. Scope: `backend/src/aegisai/api/`,
+`backend/src/aegisai/security/`, `backend/src/aegisai/db/`.
 
 Before you code:
 1. Read `.claude/skills/backend-development/SKILL.md`

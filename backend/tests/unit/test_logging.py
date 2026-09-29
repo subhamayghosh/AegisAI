@@ -5,9 +5,9 @@ import logging
 
 import pytest
 
-from promptshield.logging_ import configure_logging, get_logger
+from aegisai.logging_ import configure_logging, get_logger
 
-_LOGGER_NAME = "promptshield.test_logging"
+_LOGGER_NAME = "aegisai.test_logging"
 
 
 def test_configured_logger_emits_json_with_logger_name_and_redaction(

@@ -4,8 +4,8 @@ import base64
 
 import pytest
 
-from promptshield.schemas import AttackType, SourceType
-from promptshield.tiers import encoded_detector, tier1_heuristic
+from aegisai.schemas import AttackType, SourceType
+from aegisai.tiers import encoded_detector, tier1_heuristic
 
 # ---------------------------------------------------------------------------
 # 3 positive cases per attack type (18 total)

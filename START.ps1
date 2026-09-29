@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Starts the PromptShield backend (FastAPI/uvicorn) and frontend (Vite) together for local dev.
+    Starts the AegisAI backend (FastAPI/uvicorn) and frontend (Vite) together for local dev.
 
 .DESCRIPTION
     - Ensures backend/.env exists (copied from the root .env when available, with a local
@@ -16,7 +16,7 @@
     Skip the "npm install" / migration checks and just launch both servers.
 
 .PARAMETER ResetAdminPassword
-    Reset admin@promptshield.dev to SEED_ADMIN_PASSWORD from backend/.env.
+    Reset admin@aegisai.dev to SEED_ADMIN_PASSWORD from backend/.env.
 
 .PARAMETER SyncBackendEnv
     Rebuild backend/.env from the root .env while retaining the local SQLite override.
@@ -39,7 +39,7 @@ $RootEnv = Join-Path $RepoRoot ".env"
 $EnvExample = Join-Path $RepoRoot ".env.example"
 $Python = Join-Path $BackendDir ".venv\Scripts\python.exe"
 
-function Remove-PromptShieldDevCache {
+function Remove-AegisAIDevCache {
     <# Remove only regenerable caches inside this repository. #>
     $cacheTargets = @(
         (Join-Path $BackendDir ".pytest_cache"),
@@ -96,7 +96,7 @@ function Stop-ProcessTreeSafely {
     }
 }
 
-Write-Host "PromptShield - starting backend + frontend" -ForegroundColor Cyan
+Write-Host "AegisAI - starting backend + frontend" -ForegroundColor Cyan
 
 # --- 1. Backend .env (local SQLite dev default if missing) ------------------
 if ($SyncBackendEnv -or -not (Test-Path $BackendEnv)) {
@@ -109,7 +109,7 @@ if ($SyncBackendEnv -or -not (Test-Path $BackendEnv)) {
     $envContent = Get-Content $envSource -Raw
     $envContent = $envContent -replace `
         'DATABASE_URL=postgresql\+asyncpg://[^\r\n]*', `
-        "DATABASE_URL=sqlite+aiosqlite:///./promptshield.db"
+        "DATABASE_URL=sqlite+aiosqlite:///./aegisai.db"
     Set-Content -Path $BackendEnv -Value $envContent -Encoding utf8
     Write-Host "Created backend/.env with a local SQLite DATABASE_URL." -ForegroundColor Yellow
 }
@@ -167,7 +167,7 @@ if ($backendProcess) {
 } else {
     Write-Host "Launching backend on http://127.0.0.1:8000 ..." -ForegroundColor Green
     $backendProcess = Start-Process -FilePath $Python -ArgumentList @(
-        "-m", "uvicorn", "--app-dir", "src", "promptshield.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000"
+        "-m", "uvicorn", "--app-dir", "src", "aegisai.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000"
     ) -WorkingDirectory $BackendDir -PassThru -WindowStyle Hidden
     $ownsBackend = $true
 }
@@ -216,6 +216,6 @@ try {
         Stop-ProcessTreeSafely -Process $frontendProcess -ServiceName "Frontend"
     }
     if ($ownsBackend -or $ownsFrontend) {
-        Remove-PromptShieldDevCache
+        Remove-AegisAIDevCache
     }
 }

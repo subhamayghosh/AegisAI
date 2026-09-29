@@ -27,4 +27,4 @@ EXPOSE 8000
 # docker-compose overrides this with "alembic upgrade head && uvicorn ..." so
 # migrations run before the server starts; this default lets `docker build`
 # + `docker run` work standalone against an already-migrated database.
-CMD ["uvicorn", "promptshield.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "aegisai.main:app", "--host", "0.0.0.0", "--port", "8000"]

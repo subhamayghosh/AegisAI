@@ -6,10 +6,10 @@ from pathlib import Path
 
 import pytest
 
-from promptshield import parsers
-from promptshield.parsers import api_response, email, html_, image, pdf, source_code, text, word
-from promptshield.schemas import AttackType, SourceType
-from promptshield.tiers import tier1_heuristic
+from aegisai import parsers
+from aegisai.parsers import api_response, email, html_, image, pdf, source_code, text, word
+from aegisai.schemas import AttackType, SourceType
+from aegisai.tiers import tier1_heuristic
 
 FIXTURES = Path(__file__).parent.parent.parent / "fixtures"
 

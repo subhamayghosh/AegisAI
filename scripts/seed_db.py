@@ -24,17 +24,17 @@ import bcrypt as _bcrypt
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from promptshield.config import get_settings
-from promptshield.db.base import Base
-from promptshield.db.models import User, UserSettings
+from aegisai.config import get_settings
+from aegisai.db.base import Base
+from aegisai.db.models import User, UserSettings
 
 
 # ``email-validator`` (used by Pydantic's EmailStr) rejects reserved .local
 # addresses before an authentication attempt reaches the password check. Keep
 # this migration so existing local demo databases remain usable after upgrading.
 LEGACY_SEEDED_EMAILS = {
-    "admin@promptshield.dev": "admin@promptshield.local",
-    "demo@promptshield.dev": "demo@promptshield.local",
+    "admin@aegisai.dev": "admin@aegisai.local",
+    "demo@aegisai.dev": "demo@aegisai.local",
 }
 
 
@@ -105,7 +105,7 @@ async def main(reset_admin_password: bool = False) -> None:
     async with async_session() as session:
         await _upsert_user(
             session,
-            email="admin@promptshield.dev",
+            email="admin@aegisai.dev",
             password=admin_password,
             display_name="Admin",
             role="admin",
@@ -113,7 +113,7 @@ async def main(reset_admin_password: bool = False) -> None:
         )
         await _upsert_user(
             session,
-            email="demo@promptshield.dev",
+            email="demo@aegisai.dev",
             password="DemoPass123!",
             display_name="Demo User",
             role="user",
@@ -125,7 +125,7 @@ async def main(reset_admin_password: bool = False) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Seed PromptShield's local demo accounts.")
+    parser = argparse.ArgumentParser(description="Seed AegisAI's local demo accounts.")
     parser.add_argument(
         "--reset-admin-password",
         action="store_true",

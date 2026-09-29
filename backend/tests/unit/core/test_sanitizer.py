@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import base64
 
-from promptshield.core.sanitizer import sanitize
-from promptshield.schemas import SourceType
-from promptshield.tiers import encoded_detector, tier1_heuristic
+from aegisai.core.sanitizer import sanitize
+from aegisai.schemas import SourceType
+from aegisai.tiers import encoded_detector, tier1_heuristic
 
 
 async def test_sanitizer_wraps_retrieved_source_in_untrusted_tags() -> None:

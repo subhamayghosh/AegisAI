@@ -6,9 +6,9 @@ import json
 import pytest
 from sqlalchemy import select
 
-from promptshield.core import observability
-from promptshield.db.models import AuditLog
-from promptshield.schemas import AttackType, Decision, SourceType
+from aegisai.core import observability
+from aegisai.db.models import AuditLog
+from aegisai.schemas import AttackType, Decision, SourceType
 
 
 @pytest.fixture(autouse=True)

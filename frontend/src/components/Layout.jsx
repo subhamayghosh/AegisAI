@@ -26,7 +26,7 @@ export default function Layout() {
               <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-indigo-500/25">
                 <ShieldCheck size={19} aria-hidden="true" />
               </span>
-              <span className="hidden sm:inline">PromptShield</span>
+              <span className="hidden sm:inline">AegisAI</span>
             </Link>
             <Nav />
           </div>
@@ -93,7 +93,7 @@ export default function Layout() {
         <Outlet />
       </main>
       <footer className="relative z-10 border-t border-border/80 bg-surface/70 px-4 py-5 text-center text-xs text-textMuted">
-        PromptShield <span className="mx-1 text-primary">•</span> agentic prompt-injection firewall
+        AegisAI <span className="mx-1 text-primary">•</span> agentic prompt-injection firewall
       </footer>
     </div>
   );

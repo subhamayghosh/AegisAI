@@ -1,4 +1,4 @@
-"""Run test_corpus/master.json against a live PromptShield backend and report
+"""Run test_corpus/master.json against a live AegisAI backend and report
 pass rates broken down by attack_type and source_type.
 
 Requires a running backend (see .claude/launch.json, defaults to
@@ -210,8 +210,8 @@ def _parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--base-url",
-        default=os.environ.get("PROMPTSHIELD_BASE_URL", "http://127.0.0.1:8000"),
-        help="Base URL of a running PromptShield backend.",
+        default=os.environ.get("AEGISAI_BASE_URL", "http://127.0.0.1:8000"),
+        help="Base URL of a running AegisAI backend.",
     )
     parser.add_argument(
         "--corpus",

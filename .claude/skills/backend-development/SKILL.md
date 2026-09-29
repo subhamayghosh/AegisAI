@@ -1,10 +1,10 @@
 ---
 name: backend-development
-description: Use when working on FastAPI endpoints, Pydantic v2 schemas, dependency injection, async DB access, JWT auth wiring, or Alembic revisions under backend/src/promptshield/.
+description: Use when working on FastAPI endpoints, Pydantic v2 schemas, dependency injection, async DB access, JWT auth wiring, or Alembic revisions under backend/src/aegisai/.
 ---
 # Backend Development
 
-Use this skill whenever you touch the FastAPI backend under `backend/src/promptshield/`. Covers project layout (api/, security/, db/, core/, tiers/, parsers/, llm/), async endpoint conventions, Pydantic v2 request/response models, dependency injection patterns (`get_db`, `get_current_user`, `require_admin`), JWT wiring, error handling with typed exceptions, Alembic revision workflow, and the rule that ORM objects never leave a route unwrapped — always return a Pydantic response model. Refer here before adding a new endpoint, module, or migration.
+Use this skill whenever you touch the FastAPI backend under `backend/src/aegisai/`. Covers project layout (api/, security/, db/, core/, tiers/, parsers/, llm/), async endpoint conventions, Pydantic v2 request/response models, dependency injection patterns (`get_db`, `get_current_user`, `require_admin`), JWT wiring, error handling with typed exceptions, Alembic revision workflow, and the rule that ORM objects never leave a route unwrapped — always return a Pydantic response model. Refer here before adding a new endpoint, module, or migration.
 
 ## Parsers (`parsers/`)
 
@@ -81,7 +81,7 @@ sources per Appendix A) — each module has its own tiny `_to_bytes` helper.
     `tier2_semantic` (which loads its model at import) on a daemon thread,
     started by `main.py`'s lifespan via `pipeline.warm_up()`. Until it's
     ready, requests get an unflagged `matched_rule="tier2_unavailable"`
-    signal. `import promptshield.main` must stay free of model loading.
+    signal. `import aegisai.main` must stay free of model loading.
   - Session scores and session context are keyed by **user + session_id**
     (`f"{user.id}:{session_id}"` in the tracker, `user_id` filter in SQL):
     `session_id` is client-supplied, so keying by it alone would let one

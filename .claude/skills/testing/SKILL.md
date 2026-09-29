@@ -30,7 +30,7 @@ Use this skill for anything under `backend/tests/` or `frontend/tests/`. Covers 
 ## Tier 2 model availability
 
 `tests/unit/tiers/test_tier2.py` runs the real encoder only when
-`PROMPTSHIELD_RUN_TIER2_MODEL_TESTS=1` is explicitly set and a complete local
+`AEGISAI_RUN_TIER2_MODEL_TESTS=1` is explicitly set and a complete local
 Hugging Face snapshot is present. Ordinary/CI runs record one clear
 module-level skip, instead of retrying a model download during collection.
 That skip is an environment dependency, not evidence that the semantic tier

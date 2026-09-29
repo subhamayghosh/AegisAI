@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from types import SimpleNamespace
 
-from promptshield.config import (
+from aegisai.config import (
     DEFAULT_JUDGE_MODEL,
     DEFAULT_WORKING_MODEL,
     resolve_model_ids,

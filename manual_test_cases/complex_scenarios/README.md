@@ -2,31 +2,36 @@
 
 These probes are deliberately more realistic than a single literal attack
 phrase. They combine context, authority claims, and retrieval boundaries so a
-demo can show why PromptShield uses three independent tiers. They are synthetic
+demo can show why AegisAI uses three independent tiers. They are synthetic
 and contain no real credentials.
 
-## C01 — Three-tier policy-transition probe
+## C01 — Three-tier live Claude probe
 
 In **Inspect**, select **User message** and press **Load probe**, or paste
 [`three-tier-probe.txt`](../fixtures/three-tier-probe.txt). This is the
-recommended live demo case.
+recommended on-stage case. Its story is a fake “authorised audit” that asks
+an AI assistant to replace its rules and disclose private setup.
 
-Expected trace:
+Show the 3D spinner, then explain the trace:
 
-1. **Tier 1 — Heuristic:** runs and returns unflagged. The text intentionally
-   avoids the high-confidence literal `ignore previous instructions` pattern.
-2. **Tier 2 — Semantic:** runs and should flag an instruction override using
-   `embedding:instruction_override` when the local sentence-transformer model
-   is available. The first sentence deliberately matches the semantic corpus
-   while avoiding Tier 1's literal patterns.
-3. **Tier 3 — LLM Judge:** runs and should identify the policy-replacement plus
-   confidential-configuration request. Its rule is
-   `llm_judge:<judge-model-id>`.
+1. **Tier 1 — Heuristic:** deliberately returns unflagged. The text avoids the
+   literal `ignore previous instructions` rule, proving the result is not a
+   simple keyword demo.
+2. **Tier 2 — Semantic:** may flag the paraphrased instruction override when
+   the local sentence-transformer model is ready. If the card says
+   `tier2_unavailable`, say it is still warming up; do not claim a signal.
+3. **Tier 3 — LLM Judge:** evaluates the meaning of the false-authority claim
+   and confidential-configuration request. In the verified live run it
+   returned `BLOCK` through `llm_judge:claude-opus-4-7` at 0.97 confidence in
+   4.987 seconds.
 
-The normal outcome is `BLOCK`, because Tier 2 and Tier 3 corroborate the
-attack. The Inspect result must show three signal cards. If Tier 2 says
-`tier2_unavailable`, the machine needs its Hugging Face certificate/cache
-fixed; Tier 3 still runs and reports its own evidence.
+The normal outcome is `BLOCK`: the suspicious text never reaches the protected
+agent. The screen must show all three tier cards. If Tier 3 says
+`tier3_unavailable`, the first two tiers still run, but repair the model
+connection before presenting this as a live Claude demonstration.
+
+Use the full [live demo runbook](../LIVE_DEMO_RUNBOOK.md) for the exact
+clicks, narration, and judge Q&A.
 
 ## C02 — Indirect retrieval poisoning
 

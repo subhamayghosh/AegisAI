@@ -46,11 +46,11 @@ export default function Login() {
       if (status === 401) {
         toast.error("Incorrect email or password.");
       } else if (status === 422) {
-        toast.error("Enter a valid email address. Local demo accounts use @promptshield.dev.");
+        toast.error("Enter a valid email address. Local demo accounts use @aegisai.dev.");
       } else if (status === 429) {
         toast.error("Too many attempts. Please wait a minute and try again.");
       } else if (!error.response) {
-        toast.error("PromptShield is not reachable. Start the backend and frontend, then try again.");
+        toast.error("AegisAI is not reachable. Start the backend and frontend, then try again.");
       } else {
         toast.error("Login failed. Please try again.");
       }
@@ -67,14 +67,14 @@ export default function Login() {
         <div className="relative w-full max-w-md">
           <Link to="/" className="mb-10 flex items-center gap-2 md:hidden">
             <ShieldCheck className="text-primary" size={25} aria-hidden="true" />
-            <span className="text-lg font-semibold">PromptShield</span>
+            <span className="text-lg font-semibold">AegisAI</span>
           </Link>
           <div className="rounded-3xl border border-border bg-surface/95 p-7 shadow-2xl shadow-indigo-950/10 backdrop-blur sm:p-9">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
               <LockKeyhole size={21} aria-hidden="true" />
             </span>
             <h1 className="mt-5 text-3xl font-semibold tracking-tight">Welcome back</h1>
-            <p className="mt-2 text-sm leading-6 text-textMuted">Sign in to your PromptShield command center.</p>
+            <p className="mt-2 text-sm leading-6 text-textMuted">Sign in to your AegisAI command center.</p>
 
             <form className="mt-8 space-y-5" onSubmit={handleSubmit} noValidate>
               <div>

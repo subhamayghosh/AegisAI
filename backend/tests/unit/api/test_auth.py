@@ -6,9 +6,9 @@ import pytest
 from fastapi import HTTPException
 from jose import jwt
 
-from promptshield.config import get_settings
-from promptshield.db.models import User
-from promptshield.security.deps import require_admin
+from aegisai.config import get_settings
+from aegisai.db.models import User
+from aegisai.security.deps import require_admin
 from tests.conftest import auth_headers, login_user, register_user
 
 
