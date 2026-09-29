@@ -26,3 +26,8 @@ Use this skill for anything under `backend/tests/` or `frontend/tests/`. Covers 
   hidden content surfaces at all, via a Tier 1 flag) will often contain a
   0.95-confidence phrase that short-circuits straight to BLOCK, which is the
   wrong outcome for a scenario that wants to exercise NEUTRALIZE.
+- Test clients use `httpx.AsyncClient` inside `app.router.lifespan_context(app)`
+  so startup/shutdown behavior is exercised with each fresh SQLite test
+  server. The autouse fixture stubs `pipeline.warm_up()` to prevent a Hugging
+  Face download. Keep `anthropic<1` and `httpx` paired with `respx`; newer SDK
+  transports bypass `respx` and make mocked judge tests call the network.

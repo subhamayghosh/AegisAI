@@ -1,25 +1,32 @@
 fastapi>=0.115
 uvicorn[standard]
 sqlalchemy>=2.0
+# Required by SQLAlchemy's asyncio extension at runtime.
+greenlet
 alembic
 asyncpg
 aiosqlite
 pydantic>=2.6
+# Required by Pydantic's EmailStr fields in the auth schemas.
+email-validator
 pydantic-settings
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
 python-dotenv
-anthropic>=0.40
+# Keep the async HTTP transport compatible with respx-based tests.
+anthropic>=0.40,<1
 sentence-transformers
 pypdf
+# Generates realistic PDF payloads for parser and end-to-end tests.
+reportlab
 python-docx
 beautifulsoup4
 lxml
 pytesseract
 Pillow
 slowapi
-httpx2
+httpx
 structlog
 pytest
 pytest-asyncio
