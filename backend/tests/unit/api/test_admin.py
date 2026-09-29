@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from sqlalchemy import select, update
 
-from promptshield.db.models import AuditLog, User
+from aegisai.db.models import AuditLog, User
 from tests.conftest import auth_headers, register_user
 
 

@@ -35,7 +35,7 @@ export default function Landing() {
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur">
               <ShieldCheck className="text-cyan-300" size={21} aria-hidden="true" />
             </span>
-            <span className="tracking-tight">PromptShield</span>
+            <span className="tracking-tight">AegisAI</span>
           </div>
           <div className="flex items-center gap-2">
             <Link
@@ -60,10 +60,10 @@ export default function Landing() {
               Prompt-injection defense for production agents
             </span>
             <h1 className="mt-6 max-w-3xl text-5xl font-semibold leading-[1.02] tracking-[-0.045em] text-white sm:text-6xl lg:text-7xl">
-              Let your agent read the web. <span className="text-cyan-300">Not obey it.</span>
+              Protect every input before it reaches your <span className="text-cyan-300">AI agent.</span>
             </h1>
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
-              PromptShield inspects every message, document, and tool response through a three-tier defense pipeline — then makes the reason visible.
+              AegisAI inspects every message, document, and tool response through a three-tier defense pipeline — then makes the reason visible.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link

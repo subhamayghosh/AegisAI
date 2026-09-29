@@ -11,8 +11,8 @@ import pytest
 import respx
 from sqlalchemy import select
 
-from promptshield.db.models import AuditLog, Inspection
-from promptshield.tiers import tier3_llm_judge
+from aegisai.db.models import AuditLog, Inspection
+from aegisai.tiers import tier3_llm_judge
 from tests.conftest import auth_headers, register_user
 
 MESSAGES_URL = "https://api.anthropic.com/v1/messages"

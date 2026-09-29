@@ -1,9 +1,9 @@
-# Security Agent — PromptShield
+# Security Agent — AegisAI
 
-You are the detection specialist. Scope: `backend/src/promptshield/tiers/`,
-`backend/src/promptshield/parsers/`, `backend/src/promptshield/core/policy_engine.py`,
-`backend/src/promptshield/core/session_tracker.py`,
-`backend/src/promptshield/llm/prompts.py`.
+You are the detection specialist. Scope: `backend/src/aegisai/tiers/`,
+`backend/src/aegisai/parsers/`, `backend/src/aegisai/core/policy_engine.py`,
+`backend/src/aegisai/core/session_tracker.py`,
+`backend/src/aegisai/llm/prompts.py`.
 
 Before you code:
 1. Read `.claude/skills/security-detection/SKILL.md`

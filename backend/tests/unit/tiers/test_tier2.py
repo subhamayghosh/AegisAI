@@ -5,8 +5,8 @@ from pathlib import Path
 
 import pytest
 
-from promptshield.config import get_settings
-from promptshield.schemas import AttackType, SourceType
+from aegisai.config import get_settings
+from aegisai.schemas import AttackType, SourceType
 
 # Direct Tier 2 tests exercise a real sentence-transformer when it is already
 # cached. Do not make the whole suite import the model (and spend minutes
@@ -23,10 +23,10 @@ _has_complete_snapshot = any(
     for snapshot in _snapshots.glob("*")
     if snapshot.is_dir()
 )
-_run_real_model_tests = os.environ.get("PROMPTSHIELD_RUN_TIER2_MODEL_TESTS") == "1"
+_run_real_model_tests = os.environ.get("AEGISAI_RUN_TIER2_MODEL_TESTS") == "1"
 if not _run_real_model_tests:
     pytest.skip(
-        "set PROMPTSHIELD_RUN_TIER2_MODEL_TESTS=1 to run real embedding-model tests",
+        "set AEGISAI_RUN_TIER2_MODEL_TESTS=1 to run real embedding-model tests",
         allow_module_level=True,
     )
 if not _has_complete_snapshot:
@@ -34,7 +34,7 @@ if not _has_complete_snapshot:
 
 # Keep direct tests offline even when a complete local snapshot exists.
 os.environ.setdefault("HF_HUB_OFFLINE", "1")
-from promptshield.tiers import tier2_semantic
+from aegisai.tiers import tier2_semantic
 
 
 async def test_paraphrased_instruction_override_is_flagged() -> None:

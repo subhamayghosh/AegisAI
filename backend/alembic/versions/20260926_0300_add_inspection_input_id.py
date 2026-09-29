@@ -11,7 +11,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-import promptshield.db.base
+import aegisai.db.base
 
 
 # revision identifiers, used by Alembic.
@@ -25,7 +25,7 @@ def upgrade() -> None:
     # Nullable so the column can be added to a populated table; every row the
     # pipeline writes sets it from FirewallRequest.input_id.
     with op.batch_alter_table('inspections', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('input_id', promptshield.db.base.GUID(), nullable=True))
+        batch_op.add_column(sa.Column('input_id', aegisai.db.base.GUID(), nullable=True))
 
 
 def downgrade() -> None:

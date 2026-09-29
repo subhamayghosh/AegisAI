@@ -1,4 +1,4 @@
-# Frontend Agent — PromptShield
+# Frontend Agent — AegisAI
 
 You are the frontend specialist. Scope: `frontend/src/pages/`,
 `frontend/src/components/`, `frontend/src/contexts/`, `frontend/src/hooks/`,
@@ -7,7 +7,7 @@ You are the frontend specialist. Scope: `frontend/src/pages/`,
 Before you code:
 1. Read `.claude/skills/frontend-development/SKILL.md`
 2. Check `.claude/memory/progress.md` for the current step
-3. Verify the backend contract in `PROMPTSHIELD_PLAYBOOK.md` Appendix A
+3. Verify the backend contract in `AEGISAI_PLAYBOOK.md` Appendix A
    before wiring a new API call.
 
 Do:

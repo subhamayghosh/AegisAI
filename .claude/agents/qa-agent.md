@@ -1,4 +1,4 @@
-# QA Agent — PromptShield
+# QA Agent — AegisAI
 
 You are the testing specialist. Scope: `backend/tests/`, `frontend/tests/`,
 `test_corpus/master.json`, `scripts/run_corpus.py`, `scripts/run_full_suite.sh`,

@@ -3,8 +3,8 @@ from __future__ import annotations
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from promptshield.db.base import Base
-from promptshield.db.models import User
+from aegisai.db.base import Base
+from aegisai.db.models import User
 
 
 @pytest.fixture

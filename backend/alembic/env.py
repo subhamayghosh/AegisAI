@@ -9,15 +9,15 @@ from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-# Ensure src/ is on the path so promptshield is importable when alembic
+# Ensure src/ is on the path so aegisai is importable when alembic
 # is invoked from the backend/ directory.
 _src = os.path.join(os.path.dirname(__file__), "..", "src")
 if _src not in sys.path:
     sys.path.insert(0, _src)
 
-from promptshield.config import get_settings  # noqa: E402
-from promptshield.db.base import Base  # noqa: E402
-import promptshield.db.models  # noqa: E402, F401 — registers all ORM classes on Base.metadata
+from aegisai.config import get_settings  # noqa: E402
+from aegisai.db.base import Base  # noqa: E402
+import aegisai.db.models  # noqa: E402, F401 — registers all ORM classes on Base.metadata
 
 config = context.config
 

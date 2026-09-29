@@ -24,10 +24,10 @@ import respx
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select, update
 
-from promptshield.core import pipeline
-from promptshield.db.models import AuditLog, Inspection, User
-from promptshield.main import app
-from promptshield.schemas import AttackType, TierName, TierSignal
+from aegisai.core import pipeline
+from aegisai.db.models import AuditLog, Inspection, User
+from aegisai.main import app
+from aegisai.schemas import AttackType, TierName, TierSignal
 from tests.conftest import auth_headers, login_user, register_user
 
 MESSAGES_URL = "https://api.anthropic.com/v1/messages"

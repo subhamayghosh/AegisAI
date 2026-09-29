@@ -1,10 +1,12 @@
-# PromptShield
+# AegisAI
 
-**PromptShield** is an agentic prompt-injection firewall built as a
+**AegisAI** is an agentic prompt-injection firewall built as a
 production-grade full-stack application for the ET × Accenture AI Hackathon
 (Problem 2 — target F3/D3).
 
-## What is PromptShield
+**Protect every input before it reaches your AI agent.**
+
+## What is AegisAI
 
 It inspects text destined for downstream LLM agents across three tiers
 (regex heuristics, local embedding similarity, LLM judge) and returns an
@@ -14,7 +16,7 @@ override, role change, secret extraction, tool abuse, credential theft,
 context poisoning, multi-step jailbreak, encoded instructions, indirect
 prompt injection) across all 11 input source types (user messages, web
 pages, PDFs, emails, markdown, HTML, Word documents, API responses, OCR
-text, source code, images) — see [§2 of the playbook](./PROMPTSHIELD_PLAYBOOK.md#2-hackathon-requirement-coverage-f1f3--d1d3)
+text, source code, images) — see [§2 of the playbook](./AEGISAI_PLAYBOOK.md#2-hackathon-requirement-coverage-f1f3--d1d3)
 for the full F3/D3 coverage claim and its evidence.
 
 It ships as a real product, not a naked API: JWT auth, per-user inspection
@@ -24,12 +26,8 @@ never stores raw inspected text.
 
 ## Screenshots
 
-![PromptShield portal walkthrough](./docs/assets/portal-walkthrough.gif)
-
-The short walkthrough shows the authenticated dashboard: a live decision
-feed, per-decision colour coding, attack coverage, and session context. The
-background artwork is intentionally behind opaque content panels so security
-data stays readable.
+Start the local app with `START.ps1` to view the rebranded dashboard, decision
+feed, attack coverage, and session context.
 
 ## Use the portal
 
@@ -52,7 +50,8 @@ data stays readable.
 
 For a guided hands-on tour, including safe fixtures and expected outcomes for
 all 11 source types and all 9 attack families, use the
-[`manual_test_cases`](./manual_test_cases/README.md) demo kit.
+[`manual_test_cases`](./manual_test_cases/README.md) demo kit, including a
+[live demo runbook](./manual_test_cases/LIVE_DEMO_RUNBOOK.md).
 
 ## Quickstart (Docker)
 
@@ -69,12 +68,12 @@ make down                 # stop and remove containers + the db volume
 ```
 
 Equivalent raw compose commands (what the `Makefile` targets wrap) are in
-[§19 of the playbook](./PROMPTSHIELD_PLAYBOOK.md#19-devops--docker--local-run).
+[§19 of the playbook](./AEGISAI_PLAYBOOK.md#19-devops--docker--local-run).
 
 ### Local admin access
 
 There is one login screen, not a separate unprotected admin portal. Seed the
-demo users, then sign in as `admin@promptshield.dev` with the value of
+demo users, then sign in as `admin@aegisai.dev` with the value of
 `SEED_ADMIN_PASSWORD` in your untracked local `.env`. That value is
 intentionally omitted from `.env.example`; choose a unique local credential
 before any shared run. Open the account menu and select **Audit Log** (or
@@ -104,7 +103,7 @@ cd backend
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# The image parser (backend/src/promptshield/parsers/image.py) shells out to
+# The image parser (backend/src/aegisai/parsers/image.py) shells out to
 # the tesseract OCR binary via pytesseract — install it separately:
 #   Debian/Ubuntu: apt-get install tesseract-ocr
 #   macOS:         brew install tesseract
@@ -113,7 +112,7 @@ pip install -r requirements.txt
 # the corresponding unit test (test_image_parser_ocr_extracts_injection_text)
 # is skipped rather than failed.
 
-# The Tier 2 semantic detector (backend/src/promptshield/tiers/tier2_semantic.py)
+# The Tier 2 semantic detector (backend/src/aegisai/tiers/tier2_semantic.py)
 # downloads sentence-transformers/all-MiniLM-L6-v2 (~90MB) from Hugging Face
 # on first import, then caches it under ~/.cache/huggingface — it needs
 # network access to huggingface.co exactly once. On a machine/proxy that
@@ -122,7 +121,7 @@ pip install -r requirements.txt
 cp ../.env.example ../.env         # fill in ANTHROPIC_API_KEY
 alembic upgrade head
 python ../scripts/seed_db.py
-uvicorn promptshield.main:app --reload --port 8000
+uvicorn aegisai.main:app --reload --port 8000
 
 # 2. Frontend
 cd ../frontend
@@ -142,7 +141,7 @@ bash scripts/run_full_suite.sh         # all three, plus a pass/fail banner (CI 
 ## Environment variables
 
 All config is read from `.env` (see [`.env.example`](./.env.example)); nothing
-is hard-coded. Full reference: [§17 of the playbook](./PROMPTSHIELD_PLAYBOOK.md#17-environment--configuration).
+is hard-coded. Full reference: [§17 of the playbook](./AEGISAI_PLAYBOOK.md#17-environment--configuration).
 
 | Variable | Purpose |
 |---|---|
@@ -165,7 +164,7 @@ session suspicion update → policy engine (`ALLOW` / `NEUTRALIZE` / `BLOCK`)
 → sanitizer → persisted to history + audit log (hash only by default).
 
 Full architecture, the policy table, and the design decisions behind
-short-circuiting and source-aware neutralization: [§4 of the playbook](./PROMPTSHIELD_PLAYBOOK.md#4-solution-architecture).
+short-circuiting and source-aware neutralization: [§4 of the playbook](./AEGISAI_PLAYBOOK.md#4-solution-architecture).
 The demo narrative for the same pipeline: [`docs/DEMO_SCRIPT.md`](./docs/DEMO_SCRIPT.md).
 Manual copy/paste and upload examples: [`manual_test_cases/README.md`](./manual_test_cases/README.md).
 

@@ -78,7 +78,7 @@ export default function Register() {
         <div className="relative w-full max-w-md">
           <Link to="/" className="mb-8 flex items-center gap-2 md:hidden">
             <ShieldCheck className="text-primary" size={25} aria-hidden="true" />
-            <span className="text-lg font-semibold">PromptShield</span>
+            <span className="text-lg font-semibold">AegisAI</span>
           </Link>
           <div className="rounded-3xl border border-border bg-surface/95 p-7 shadow-2xl shadow-indigo-950/10 backdrop-blur sm:p-9">
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">

@@ -4,7 +4,7 @@
     {
       "name": "backend",
       "runtimeExecutable": "cmd",
-      "runtimeArgs": ["/c", "cd backend && python -m uvicorn promptshield.main:app --host 127.0.0.1 --port 8000"],
+      "runtimeArgs": ["/c", "cd backend && python -m uvicorn aegisai.main:app --host 127.0.0.1 --port 8000"],
       "port": 8000
     },
     {

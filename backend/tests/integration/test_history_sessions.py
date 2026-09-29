@@ -6,9 +6,9 @@ from datetime import UTC, datetime, timedelta
 import pytest
 from sqlalchemy import select
 
-from promptshield.db.models import Inspection, User
-from promptshield.core import session_tracker
-from promptshield.schemas import TierName, TierSignal
+from aegisai.db.models import Inspection, User
+from aegisai.core import session_tracker
+from aegisai.schemas import TierName, TierSignal
 from tests.conftest import auth_headers, register_user
 
 BASE_TIME = datetime(2026, 9, 20, 12, 0, tzinfo=UTC)

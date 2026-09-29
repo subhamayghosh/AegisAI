@@ -23,7 +23,7 @@ export default function AuthVisual({ mode }) {
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/20 backdrop-blur">
             <ShieldCheck size={23} className="text-cyan-300" aria-hidden="true" />
           </span>
-          <span className="text-base font-semibold tracking-tight lg:text-lg">PromptShield</span>
+          <span className="text-base font-semibold tracking-tight lg:text-lg">AegisAI</span>
         </Link>
 
         <div className="relative mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center py-7 text-center">
@@ -40,7 +40,7 @@ export default function AuthVisual({ mode }) {
             <h1 className="mt-4 text-xl font-semibold leading-tight tracking-tight text-white lg:text-3xl xl:text-4xl">
               {isRegistration
                 ? "Build a safer path to every agent."
-                : "The defense layer between content and your agent."}
+                : "Protect every input before it reaches your AI agent."}
             </h1>
             <p className="mt-3 hidden text-sm leading-6 text-slate-300 lg:block xl:text-base">
               {isRegistration

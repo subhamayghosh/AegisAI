@@ -12,13 +12,13 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.pool import StaticPool
 
-from promptshield.core import pipeline
-from promptshield.db.base import Base
-from promptshield.db.session import get_db
-from promptshield.llm import client as llm_client
-from promptshield.main import app
-from promptshield.schemas import SourceType, TierName, TierSignal
-from promptshield.security.rate_limit import limiter
+from aegisai.core import pipeline
+from aegisai.db.base import Base
+from aegisai.db.session import get_db
+from aegisai.llm import client as llm_client
+from aegisai.main import app
+from aegisai.schemas import SourceType, TierName, TierSignal
+from aegisai.security.rate_limit import limiter
 
 
 @pytest.fixture(autouse=True)

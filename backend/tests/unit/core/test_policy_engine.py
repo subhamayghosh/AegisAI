@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import pytest
 
-from promptshield.core.policy_engine import decide
-from promptshield.schemas import AttackType, Decision, SourceType, TierName, TierSignal
+from aegisai.core.policy_engine import decide
+from aegisai.schemas import AttackType, Decision, SourceType, TierName, TierSignal
 
 
 def _sig(

@@ -1,12 +1,12 @@
-# CLAUDE.md — PromptShield Repository Context
+# CLAUDE.md — AegisAI Repository Context
 
-You are working on **PromptShield**, an agentic prompt-injection firewall
+You are working on **AegisAI**, an agentic prompt-injection firewall
 built as a production-grade full-stack application for the ET × Accenture
 AI Hackathon (Problem 2 — target F3/D3).
 
 ## Read these before doing anything
 
-1. `PROMPTSHIELD_PLAYBOOK.md` — the full playbook. Ground truth for scope,
+1. `AEGISAI_PLAYBOOK.md` — the full playbook. Ground truth for scope,
    architecture, and step order.
 2. `.claude/rules/coding-standards.md`
 3. `.claude/rules/security-rules.md`
@@ -33,7 +33,7 @@ AI Hackathon (Problem 2 — target F3/D3).
   from user settings before falling back to the app-default in `.env`.
 - **Never** modify the JSON contract in `Appendix A` of the playbook
   without team sign-off — every tier depends on it.
-- Follow the step order in `PROMPTSHIELD_PLAYBOOK.md` §13. Do not build
+- Follow the step order in `AEGISAI_PLAYBOOK.md` §13. Do not build
   Step N+1 before Step N is in `.claude/memory/progress.md` as complete.
 
 ## Skills available

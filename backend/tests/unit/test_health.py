@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from promptshield.main import app
+from aegisai.main import app
 
 client = TestClient(app)
 

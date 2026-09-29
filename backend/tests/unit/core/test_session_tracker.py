@@ -4,9 +4,9 @@ import uuid
 
 import pytest
 
-from promptshield.core import session_tracker
-from promptshield.core.policy_engine import decide
-from promptshield.schemas import AttackType, Decision, SourceType, TierName, TierSignal
+from aegisai.core import session_tracker
+from aegisai.core.policy_engine import decide
+from aegisai.schemas import AttackType, Decision, SourceType, TierName, TierSignal
 
 
 def _signal(confidence: float, flagged: bool = True) -> TierSignal:
