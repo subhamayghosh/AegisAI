@@ -51,3 +51,11 @@ Step 13 added `recharts` (not previously in package.json) for `SessionDetail.jsx
 ## Vite proxy
 
 Backend routers have no `/api` prefix (e.g. `/auth/login`, not `/api/auth/login`). `vite.config.js`'s dev proxy rewrites `/api/*` -> `http://localhost:8000/*` (strips the `/api` prefix). The axios instance's `baseURL` is `"/api"` — always call endpoints as `/auth/login`, `/users/me`, etc. through `client`, and the proxy handles the rest.
+
+## Auth visual system
+
+`AuthVisual.jsx` is the shared, desktop/tablet visual panel for Login and Register. It uses the decorative assets in `public/images/`, is hidden only below Tailwind's `md` breakpoint, and keeps the actual form in the adjacent responsive panel. Keep the image alt text empty when it is purely decorative, preserve visible labels and keyboard focus for every form field, and use the shared decision tokens (green ALLOW, amber NEUTRALIZE, red BLOCK) whenever a result state is presented.
+
+## Manual inspection sessions
+
+`Inspect.jsx` has optional Session ID and Turn fields so a person can replay multi-turn jailbreak cases without calling the API directly. A blank Session ID preserves the one-off inspection behaviour. When a Session ID is supplied it must be a valid UUID (backend contract), and the user reuses it while incrementing Turn from 1; keep this in sync with `manual_test_cases/README.md` whenever the form changes.

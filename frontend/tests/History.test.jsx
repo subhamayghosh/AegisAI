@@ -6,6 +6,12 @@ import History from "../src/pages/History";
 
 vi.mock("../src/api/history", () => ({
   listHistory: vi.fn(),
+  clearHistory: vi.fn(),
+  deleteHistoryItem: vi.fn(),
+}));
+
+vi.mock("../src/hooks/useToast", () => ({
+  useToast: () => ({ success: vi.fn(), error: vi.fn() }),
 }));
 
 import * as historyApi from "../src/api/history";
@@ -70,5 +76,34 @@ describe("History", () => {
       await screen.findByText(/no inspections match these filters yet/i)
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /run an inspection/i })).toBeInTheDocument();
+  });
+
+  it("confirms before resetting only the user's history", async () => {
+    historyApi.listHistory.mockResolvedValue({
+      items: [
+        {
+          id: "inspection-1",
+          source_type: "user_message",
+          final_decision: "ALLOW",
+          attack_type: null,
+          input_hash: "abc123",
+          latency_ms_total: 12,
+          created_at: "2026-01-01T00:00:00Z",
+        },
+      ],
+      total: 1,
+      page: 1,
+      page_size: 25,
+    });
+    historyApi.clearHistory.mockResolvedValue({ deleted_count: 1 });
+
+    renderHistory();
+
+    await screen.findByText("abc123");
+    fireEvent.click(screen.getByRole("button", { name: /reset history/i }));
+    expect(screen.getByRole("alertdialog")).toHaveTextContent(/audit trail remains/i);
+    fireEvent.click(screen.getByRole("button", { name: /clear history/i }));
+
+    await waitFor(() => expect(historyApi.clearHistory).toHaveBeenCalledTimes(1));
   });
 });

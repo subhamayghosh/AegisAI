@@ -29,9 +29,9 @@ export default function AttackBreakdown({ counts }) {
             <span>{LABELS[type] || type}</span>
             <span>{count}</span>
           </div>
-          <div className="mt-1 h-2 rounded-full bg-surfaceAlt">
+          <div className="mt-1.5 h-2 rounded-full bg-surfaceAlt">
             <div
-              className="h-full rounded-full bg-primary"
+              className="h-full rounded-full bg-gradient-to-r from-primary to-fuchsia-500"
               style={{ width: `${max ? (count / max) * 100 : 0}%` }}
             />
           </div>

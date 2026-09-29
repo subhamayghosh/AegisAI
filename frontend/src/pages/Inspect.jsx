@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Loader2, ShieldQuestion } from "lucide-react";
+import { ShieldQuestion } from "lucide-react";
 import { useToast } from "../hooks/useToast";
 import * as firewallApi from "../api/firewall";
 import DecisionPill from "../components/DecisionPill";
 import SignalCard from "../components/SignalCard";
+import ThreeDSpinner from "../components/ThreeDSpinner";
 import { ATTACK_TYPE_LABELS, SOURCE_TYPES } from "../constants";
 
 const BINARY_SOURCE_TYPES = new Set(["pdf", "word_doc", "image"]);
@@ -31,6 +32,8 @@ export default function Inspect() {
   const [sourceType, setSourceType] = useState("user_message");
   const [text, setText] = useState("");
   const [file, setFile] = useState(null);
+  const [sessionId, setSessionId] = useState("");
+  const [turnId, setTurnId] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
 
@@ -68,8 +71,8 @@ export default function Inspect() {
       }
       const response = await firewallApi.inspect({
         input_id: crypto.randomUUID(),
-        session_id: null,
-        turn_id: 1,
+        session_id: sessionId.trim() || null,
+        turn_id: Math.max(1, Number(turnId) || 1),
         text: payloadText,
         source_type: sourceType,
         metadata,
@@ -149,19 +152,55 @@ export default function Inspect() {
           </div>
         )}
 
+        <fieldset className="rounded-2xl border border-border/80 bg-surfaceAlt/50 p-3">
+          <legend className="px-1 text-sm font-medium">Session tracking <span className="font-normal text-textMuted">(optional)</span></legend>
+          <div className="mt-1 grid gap-3 sm:grid-cols-[minmax(0,1fr)_7rem]">
+            <div>
+              <label htmlFor="sessionId" className="block text-xs text-textMuted">Session ID</label>
+              <input
+                id="sessionId"
+                type="text"
+                value={sessionId}
+                onChange={(e) => setSessionId(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm font-mono"
+                placeholder="Leave blank for a one-off inspection"
+              />
+            </div>
+            <div>
+              <label htmlFor="turnId" className="block text-xs text-textMuted">Turn</label>
+              <input
+                id="turnId"
+                type="number"
+                min="1"
+                value={turnId}
+                onChange={(e) => setTurnId(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-border bg-surface px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+          <p className="mt-2 text-xs leading-5 text-textMuted">Reuse a valid UUID and increase the turn number to demonstrate multi-turn jailbreak detection.</p>
+        </fieldset>
+
         <button
           type="submit"
           disabled={submitting}
           className="flex items-center gap-2 rounded-card bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primaryHover disabled:opacity-60"
         >
-          {submitting && <Loader2 className="animate-spin" size={16} aria-hidden="true" />}
           {submitting ? "Inspecting…" : "Inspect"}
         </button>
       </form>
 
       <div className="rounded-card border border-border bg-surface p-5">
         <h2 className="mb-3 text-lg font-semibold">Result</h2>
-        {!result && (
+        {submitting ? (
+          <div className="flex flex-col items-center justify-center gap-4 py-12 text-center text-textMuted">
+            <ThreeDSpinner label="Inspecting input through the security pipeline" />
+            <div>
+              <p className="text-sm font-medium text-text">Inspecting through the security pipeline</p>
+              <p className="mt-1 text-xs">Parsing the source and checking all three tiers…</p>
+            </div>
+          </div>
+        ) : !result && (
           <div className="flex flex-col items-center justify-center gap-2 py-12 text-center text-textMuted">
             <ShieldQuestion size={32} aria-hidden="true" />
             <p className="text-sm">Run an inspection to see the decision and tier signals.</p>

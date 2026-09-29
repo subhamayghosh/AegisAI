@@ -145,13 +145,19 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Dashboard</h1>
+      <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/10 via-surface to-cyan-400/10 p-6 shadow-sm sm:p-7">
+        <div className="absolute -right-10 -top-16 h-48 w-48 rounded-full bg-primary/15 blur-3xl" aria-hidden="true" />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">Security command center</p>
+            <h1 className="mt-1 text-2xl font-semibold tracking-tight">Protection at a glance</h1>
+            <p className="mt-1 text-sm text-textMuted">Monitor every decision, then trace the signals behind it.</p>
+          </div>
         <button
           type="button"
           onClick={runDemoMode}
           disabled={demoRunning}
-          className="flex items-center gap-2 rounded-card bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primaryHover disabled:opacity-60"
+          className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:-translate-y-0.5 hover:bg-primaryHover disabled:translate-y-0 disabled:opacity-60"
         >
           {demoRunning ? (
             <Loader2 className="animate-spin" size={16} aria-hidden="true" />
@@ -160,6 +166,7 @@ export default function Dashboard() {
           )}
           {demoRunning ? "Running demo…" : "Run demo mode"}
         </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -175,17 +182,17 @@ export default function Dashboard() {
       </div>
 
       <div className="flex flex-col gap-6 xl:flex-row">
-        <section className="flex-1 rounded-card border border-border bg-surface p-4">
-          <h2 className="mb-3 font-semibold">Live event feed</h2>
+        <section className="flex-1 rounded-2xl border border-border bg-surface/95 p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between"><h2 className="font-semibold">Live event feed</h2><span className="flex items-center gap-1.5 text-xs text-allow"><span className="h-2 w-2 rounded-full bg-allow" />Live</span></div>
           <EventFeed events={events} />
         </section>
 
         <div className="w-full space-y-6 xl:w-96">
-          <section className="rounded-card border border-border bg-surface p-4">
+          <section className="rounded-2xl border border-border bg-surface/95 p-5 shadow-sm">
             <h2 className="mb-3 font-semibold">Attack breakdown</h2>
             <AttackBreakdown counts={attackCounts} />
           </section>
-          <section className="rounded-card border border-border bg-surface p-4">
+          <section className="rounded-2xl border border-border bg-surface/95 p-5 shadow-sm">
             <h2 className="mb-3 font-semibold">Session explorer</h2>
             <SessionExplorer session={recentSession} turns={sessionDetailQuery.data?.turns ?? []} />
           </section>

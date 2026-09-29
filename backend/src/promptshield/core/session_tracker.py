@@ -42,3 +42,11 @@ def get_score(session_id: str | UUID) -> float:
 def reset(session_id: str | UUID) -> None:
     with _lock:
         _scores.pop(str(session_id), None)
+
+
+def reset_for_user(user_id: str | UUID) -> None:
+    """Discard only one user's in-memory session scores after a history reset."""
+    prefix = f"{user_id}:"
+    with _lock:
+        for key in [key for key in _scores if key.startswith(prefix)]:
+            _scores.pop(key, None)

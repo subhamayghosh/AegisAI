@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { Shield, ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { Shield, ShieldCheck, ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import ThemeToggle from "./ThemeToggle";
 import Nav from "./Nav";
@@ -17,13 +17,16 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b border-border bg-surface">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3">
+    <div className="relative isolate flex min-h-screen flex-col overflow-hidden">
+      <div className="app-shell-ambient pointer-events-none fixed inset-0 z-0" aria-hidden="true" />
+      <header className="sticky top-0 z-20 border-b border-border/80 bg-surface/90 backdrop-blur-xl">
+        <div className="mx-auto flex w-full max-w-[90rem] items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
           <div className="flex items-center gap-6">
-            <Link to="/dashboard" className="flex items-center gap-2 font-semibold">
-              <Shield className="text-primary" size={22} aria-hidden="true" />
-              <span>PromptShield</span>
+            <Link to="/dashboard" className="flex items-center gap-2.5 font-semibold tracking-tight">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-indigo-500/25">
+                <ShieldCheck size={19} aria-hidden="true" />
+              </span>
+              <span className="hidden sm:inline">PromptShield</span>
             </Link>
             <Nav />
           </div>
@@ -36,7 +39,7 @@ export default function Layout() {
                 aria-haspopup="true"
                 aria-expanded={menuOpen}
                 aria-label="Open user menu"
-                className="flex items-center gap-2 rounded-card border border-border bg-surfaceAlt px-3 py-1.5 text-sm hover:bg-surface"
+                className="flex items-center gap-2 rounded-xl border border-border bg-surfaceAlt/70 px-3 py-2 text-sm transition hover:bg-surface"
               >
                 <span>{user?.display_name || "Account"}</span>
                 <ChevronDown size={14} aria-hidden="true" />
@@ -44,7 +47,7 @@ export default function Layout() {
               {menuOpen && (
                 <div
                   role="menu"
-                  className="absolute right-0 z-10 mt-2 w-48 rounded-card border border-border bg-surface py-1 shadow-lg"
+                  className="absolute right-0 z-10 mt-2 w-52 rounded-2xl border border-border bg-surface py-1.5 shadow-2xl shadow-indigo-950/10"
                 >
                   <Link
                     role="menuitem"
@@ -86,11 +89,11 @@ export default function Layout() {
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6">
+      <main className="relative z-10 mx-auto w-full max-w-[90rem] flex-1 px-4 py-7 sm:px-6">
         <Outlet />
       </main>
-      <footer className="border-t border-border bg-surface px-4 py-4 text-center text-sm text-textMuted">
-        PromptShield — agentic prompt-injection firewall
+      <footer className="relative z-10 border-t border-border/80 bg-surface/70 px-4 py-5 text-center text-xs text-textMuted">
+        PromptShield <span className="mx-1 text-primary">•</span> agentic prompt-injection firewall
       </footer>
     </div>
   );

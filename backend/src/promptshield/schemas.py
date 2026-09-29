@@ -236,6 +236,10 @@ class InspectionDetailOut(InspectionOut):
     judge_model_id: str
 
 
+class HistoryDeleteOut(BaseModel):
+    deleted_count: int
+
+
 # ---------------------------------------------------------------------------
 # Sessions
 # ---------------------------------------------------------------------------

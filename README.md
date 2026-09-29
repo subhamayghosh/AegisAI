@@ -24,13 +24,35 @@ never stores raw inspected text.
 
 ## Screenshots
 
-> TODO — capture from a live `docker-compose up` run before the demo:
+![PromptShield portal walkthrough](./docs/assets/portal-walkthrough.gif)
 
-- TODO: Dashboard mid-attack (Demo Mode running, stat cards + event feed live)
-- TODO: Inspect page showing a BLOCK decision with the Tier 1 signal card
-- TODO: Session explorer showing suspicion score climbing across a 3-turn jailbreak
-- TODO: Settings page — Working/Judge model dropdowns
-- TODO: Admin audit log (hashes only, no raw text)
+The short walkthrough shows the authenticated dashboard: a live decision
+feed, per-decision colour coding, attack coverage, and session context. The
+background artwork is intentionally behind opaque content panels so security
+data stays readable.
+
+## Use the portal
+
+1. **Dashboard** is the live control room. It shows total, allowed,
+   neutralized, and blocked inspections; the latest event feed; attack
+   breakdown; and the most recent session score.
+2. **Inspect** is the manual test console. Pick one of the 11 source types,
+   paste content or upload PDF/DOCX/image, and read the decision plus every
+   tier's signal. It can also reuse a Session ID and increment a turn number
+   to demonstrate a multi-turn jailbreak.
+3. **History** is the user's inspection record. Filter it, open any row for
+   its reasoning and signals, delete an individual row, or reset your own
+   history. Reset never deletes the separate hash-only audit log.
+4. **Sessions** turns a repeated Session ID into a suspicion-score timeline.
+5. **Settings** changes privacy preferences, detection thresholds, theme,
+   and the permitted working/judge models.
+6. **Admin users** see **Audit Log** in the account menu. It exposes global
+   metrics/events and the privacy-safe audit records; ordinary users cannot
+   open `/audit`.
+
+For a guided hands-on tour, including safe fixtures and expected outcomes for
+all 11 source types and all 9 attack families, use the
+[`manual_test_cases`](./manual_test_cases/README.md) demo kit.
 
 ## Quickstart (Docker)
 
@@ -49,7 +71,32 @@ make down                 # stop and remove containers + the db volume
 Equivalent raw compose commands (what the `Makefile` targets wrap) are in
 [§19 of the playbook](./PROMPTSHIELD_PLAYBOOK.md#19-devops--docker--local-run).
 
+### Local admin access
+
+There is one login screen, not a separate unprotected admin portal. Seed the
+demo users, then sign in as `admin@promptshield.dev` with the value of
+`SEED_ADMIN_PASSWORD` in your local `.env`. The default shown only in
+`.env.example` is for local development; change it before any shared run.
+Open the account menu and select **Audit Log** (or visit `/audit`). The seed
+script also creates `demo@promptshield.dev` with password `DemoPass123!`
+as a non-admin account for comparison.
+
 ## Local dev (no Docker)
+
+On Windows, the quickest route is:
+
+```powershell
+.\START.ps1
+# If the seeded admin cannot sign in, reset only that local account:
+.\START.ps1 -ResetAdminPassword
+# If you change the root .env and want to copy its non-database settings:
+.\START.ps1 -SyncBackendEnv
+```
+
+The launcher migrates the local database, seeds the demo accounts, starts
+FastAPI on `:8000` and Vite on `:3000`, then stops both and removes only
+regenerable Vite/pytest caches when its PowerShell session ends. It never
+removes your SQLite database, `.env`, uploads, or `node_modules`.
 
 ```bash
 # 1. Backend
@@ -120,6 +167,7 @@ session suspicion update → policy engine (`ALLOW` / `NEUTRALIZE` / `BLOCK`)
 Full architecture, the policy table, and the design decisions behind
 short-circuiting and source-aware neutralization: [§4 of the playbook](./PROMPTSHIELD_PLAYBOOK.md#4-solution-architecture).
 The demo narrative for the same pipeline: [`docs/DEMO_SCRIPT.md`](./docs/DEMO_SCRIPT.md).
+Manual copy/paste and upload examples: [`manual_test_cases/README.md`](./manual_test_cases/README.md).
 
 ## Repository layout
 
@@ -130,6 +178,7 @@ The demo narrative for the same pipeline: [`docs/DEMO_SCRIPT.md`](./docs/DEMO_SC
 - `scripts/`     — corpus runner, full-suite runner, secret scanner
 - `docker/`      — Dockerfiles + compose
 - `docs/`        — architecture diagrams, demo script
+- `manual_test_cases/` — safe Inspect fixtures and expected manual outcomes
 
 ## Contributing
 

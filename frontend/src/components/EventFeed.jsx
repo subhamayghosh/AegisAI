@@ -10,33 +10,33 @@ export default function EventFeed({ events }) {
   }
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto rounded-xl border border-border/70">
       <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left text-xs text-textMuted">
-            <th className="px-2 py-1 font-medium">Time</th>
-            <th className="px-2 py-1 font-medium">Source</th>
-            <th className="px-2 py-1 font-medium">Input hash</th>
-            <th className="px-2 py-1 font-medium">Attack type</th>
-            <th className="px-2 py-1 font-medium">Decision</th>
-            <th className="px-2 py-1 text-right font-medium">Latency</th>
+        <thead className="bg-surfaceAlt/70">
+          <tr className="text-left text-xs font-semibold uppercase tracking-wide text-textMuted">
+            <th className="px-3 py-2.5">Time</th>
+            <th className="px-3 py-2.5">Source</th>
+            <th className="px-3 py-2.5">Input hash</th>
+            <th className="px-3 py-2.5">Attack type</th>
+            <th className="px-3 py-2.5">Decision</th>
+            <th className="px-3 py-2.5 text-right">Latency</th>
           </tr>
         </thead>
         <tbody>
           {events.map((event) => (
-            <tr key={event.key} className="border-t border-border">
-              <td className="whitespace-nowrap px-2 py-1.5 text-xs text-textMuted">
+            <tr key={event.key} className="border-t border-border/70 transition-colors hover:bg-surfaceAlt/45">
+              <td className="whitespace-nowrap px-3 py-3 text-xs text-textMuted">
                 {new Date(event.time).toLocaleTimeString()}
               </td>
-              <td className="px-2 py-1.5">{event.source_type}</td>
-              <td className="px-2 py-1.5 font-mono text-xs">
+              <td className="px-3 py-3">{event.source_type}</td>
+              <td className="px-3 py-3 font-mono text-xs">
                 {event.input_hash ? `${event.input_hash.slice(0, 10)}…` : "—"}
               </td>
-              <td className="px-2 py-1.5">{event.attack_type || "—"}</td>
-              <td className="px-2 py-1.5">
+              <td className="px-3 py-3">{event.attack_type || "—"}</td>
+              <td className="px-3 py-3">
                 <DecisionPill decision={event.decision} />
               </td>
-              <td className="px-2 py-1.5 text-right text-xs text-textMuted">
+              <td className="px-3 py-3 text-right text-xs text-textMuted">
                 {event.latency_ms} ms
               </td>
             </tr>
