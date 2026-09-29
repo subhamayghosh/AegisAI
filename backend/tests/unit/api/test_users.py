@@ -75,3 +75,32 @@ async def test_password_change_revokes_refresh_tokens(client):
     # The original refresh token must now be invalid.
     r = await client.post("/auth/refresh", json={"refresh_token": tokens["refresh_token"]})
     assert r.status_code == 401
+
+
+async def test_password_change_invalidates_old_access_token(client):
+    tokens = await register_user(client)
+    old_headers = auth_headers(tokens["access_token"])
+
+    # The old access token works before the change.
+    assert (await client.get("/users/me", headers=old_headers)).status_code == 200
+
+    resp = await client.post(
+        "/users/me/password",
+        json={"current_password": "SuperSecret123!", "new_password": "BrandNewPass456!"},
+        headers=old_headers,
+    )
+    assert resp.status_code == 204
+
+    # The same access token — still unexpired — must now be rejected, not
+    # just refresh tokens: token_version was bumped, so its `ver` claim is
+    # stale.
+    assert (await client.get("/users/me", headers=old_headers)).status_code == 401
+
+    # A token minted after the change (via the new password) works fine.
+    login = await client.post(
+        "/auth/login",
+        json={"email": "alice@example.com", "password": "BrandNewPass456!"},
+    )
+    assert login.status_code == 200
+    new_headers = auth_headers(login.json()["access_token"])
+    assert (await client.get("/users/me", headers=new_headers)).status_code == 200

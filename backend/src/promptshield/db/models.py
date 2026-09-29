@@ -46,6 +46,10 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(TZDateTime, nullable=False, default=_now_utc)
     last_login_at: Mapped[datetime | None] = mapped_column(TZDateTime, nullable=True)
+    # Bumped on password change so every access token issued before the
+    # change fails its `ver` check immediately, without relying on
+    # clock-resolution timestamp comparisons.
+    token_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     settings: Mapped[UserSettings | None] = relationship(
         "UserSettings", back_populates="user", uselist=False, cascade="all, delete-orphan"

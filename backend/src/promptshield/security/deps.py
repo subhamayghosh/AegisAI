@@ -41,6 +41,10 @@ async def get_current_user(
     user = result.scalar_one_or_none()
     if user is None or not user.is_active:
         raise _UNAUTH
+    if decoded.ver != user.token_version:
+        # Password change bumped token_version — this access token predates
+        # it and must not keep working for its remaining TTL.
+        raise _UNAUTH
     return user
 
 

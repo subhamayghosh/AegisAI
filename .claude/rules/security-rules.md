@@ -7,6 +7,10 @@ Non-negotiable. These rules override convenience, aesthetics, and velocity.
 - Passwords are hashed with **bcrypt cost 12**. Never logged. Never returned in any response.
 - JWTs are **HS256** signed with `JWT_SECRET` (min 32 chars, sourced from `.env`).
 - Access token TTL 15 min. Refresh token TTL 7 days, single-use rotation.
+- Access tokens carry a `ver` claim (`users.token_version`). Password change
+  increments `token_version`, so `get_current_user` rejects every access
+  token issued before the change immediately — not just refresh tokens —
+  without relying on clock-resolution timestamp comparisons.
 - Rate limits via `slowapi`: `/auth/login` 5/min/IP, `/firewall/inspect` 60/min/user.
 - Password reset in v1 always returns 202 to avoid user enumeration.
 - `require_admin` dependency guards every `/admin/*` route.

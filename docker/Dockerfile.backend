@@ -1,0 +1,30 @@
+# Build context is the repo root (see docker/docker-compose.yml), so every
+# COPY below is rooted at the repo, not at docker/.
+FROM python:3.11-slim
+
+# tesseract-ocr is a runtime shell-out for parsers/image.py (pytesseract);
+# everything else in requirements.txt ships as prebuilt wheels, no other
+# system packages needed.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY backend/requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY backend/ ./
+RUN pip install --no-cache-dir .
+
+# scripts/seed_db.py lives at the repo root, not under backend/ — copied
+# separately so `make seed` (docker-compose exec backend python
+# /app/scripts/seed_db.py) works without shipping the whole scripts/ dir.
+COPY scripts/seed_db.py ./scripts/seed_db.py
+
+EXPOSE 8000
+
+# docker-compose overrides this with "alembic upgrade head && uvicorn ..." so
+# migrations run before the server starts; this default lets `docker build`
+# + `docker run` work standalone against an already-migrated database.
+CMD ["uvicorn", "promptshield.main:app", "--host", "0.0.0.0", "--port", "8000"]

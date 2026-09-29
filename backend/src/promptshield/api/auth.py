@@ -45,7 +45,7 @@ def _user_agent(request: Request) -> str | None:
 
 
 async def _issue_tokens(db: AsyncSession, user: User) -> tuple[str, str]:
-    access = create_access_token(user.id)
+    access = create_access_token(user.id, token_version=user.token_version)
     refresh, jti = create_refresh_token(user.id)
     db.add(
         RefreshToken(

@@ -55,6 +55,10 @@ async def change_password(
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Current password is incorrect")
 
     user.password_hash = hash_password(body.new_password)
+    # Invalidate every access token already issued, not just refresh
+    # tokens — get_current_user rejects any token whose `ver` claim no
+    # longer matches.
+    user.token_version += 1
 
     # Revoke every outstanding refresh token — user must log in again on
     # other devices.

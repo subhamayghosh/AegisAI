@@ -22,6 +22,7 @@ class DecodedToken:
     jti: str | None
     exp: datetime
     iat: datetime
+    ver: int
 
 
 def _now() -> datetime:
@@ -41,13 +42,14 @@ def _decode(token: str) -> dict[str, Any]:
         raise TokenError(str(exc)) from exc
 
 
-def create_access_token(subject: str | uuid.UUID) -> str:
+def create_access_token(subject: str | uuid.UUID, token_version: int = 0) -> str:
     s = get_settings()
     now = _now()
     exp = now + timedelta(minutes=s.access_token_ttl_min)
     payload = {
         "sub": str(subject),
         "typ": "access",
+        "ver": token_version,
         "iat": int(now.timestamp()),
         "exp": int(exp.timestamp()),
     }
@@ -105,4 +107,5 @@ def _to_decoded(payload: dict[str, Any]) -> DecodedToken:
         jti=payload.get("jti"),
         exp=datetime.fromtimestamp(int(payload["exp"]), tz=timezone.utc),
         iat=datetime.fromtimestamp(int(payload["iat"]), tz=timezone.utc),
+        ver=int(payload.get("ver", 0)),
     )
