@@ -217,3 +217,7 @@ on `regex:`/`encoded:` matches and wraps retrieved source types. When a
 Tier 2 or Tier 3 signal alone, `sanitized_text` equals the input. Decide
 whether those cases should be wrapped too (or escalated) before relying on
 NEUTRALIZE for non-retrieved sources.
+
+## OCR safety guardrails
+
+Image demos must exercise the same pipeline as pasted text, but OCR is an external process and must be bounded. `parsers/image.py` caps the OCR dimensions and passes a timeout to Tesseract; it raises `OCRTimeoutError` so the API can return a clear 408 instead of hanging. Do not remove the timeout or run image parsing on the event loop.

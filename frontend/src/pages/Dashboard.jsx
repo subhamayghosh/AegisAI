@@ -125,7 +125,8 @@ export default function Dashboard() {
           session_id: sessionId,
           turn_id: i + 1,
           text: DEMO_ATTACKS[i].text,
-          source_type: "user_message",
+          source_type: DEMO_ATTACKS[i].source_type,
+          metadata: { demo_label: DEMO_ATTACKS[i].label },
         });
         queryClient.invalidateQueries({ queryKey: ["admin-metrics"] });
         queryClient.invalidateQueries({ queryKey: ["admin-events"] });

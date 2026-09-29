@@ -41,3 +41,7 @@ the opt-in suite before claiming live Tier 2 verification.
   server. The autouse fixture stubs `pipeline.warm_up()` to prevent a Hugging
   Face download. Keep `anthropic<1` and `httpx` paired with `respx`; newer SDK
   transports bypass `respx` and make mocked judge tests call the network.
+
+## Live/demo coverage
+
+When changing Inspect, cover the scenario selector, paste/attachment mode, and the console in Vitest. For live readiness, run a small, explicitly named smoke set against the configured Anthropic judge with synthetic content only; never print the API key, raw user content, or response payloads that could contain sensitive text.

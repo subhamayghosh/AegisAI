@@ -117,3 +117,7 @@ are redacted to `***`. Never pass inspected text, emails, or IPs as values.
 To assert on log output in tests, use pytest's `caplog` and `json.loads(record.getMessage())`
 — not `structlog.testing.capture_logs()`, which misses any logger an earlier
 test already cached (`cache_logger_on_first_use=True`), making it order-dependent.
+
+## Bounded image OCR
+
+The image parser uses `ImageOps.exif_transpose`, converts to RGB, downsizes any image larger than `OCR_MAX_DIMENSION`, and passes `OCR_TIMEOUT_S` to Tesseract. A timeout is surfaced as HTTP 408 with an actionable message; missing Tesseract remains HTTP 503. Keep OCR work inside `asyncio.to_thread` so the event loop cannot be blocked by image parsing.

@@ -200,6 +200,7 @@ export default function History() {
                 <tr className="text-left text-xs text-textMuted">
                   <th className="px-4 py-2 font-medium">Time</th>
                   <th className="px-4 py-2 font-medium">Source</th>
+                  <th className="px-4 py-2 font-medium">Input hash</th>
                   <th className="px-4 py-2 font-medium">Attack type</th>
                   <th className="px-4 py-2 font-medium">Decision</th>
                   <th className="px-4 py-2 text-right font-medium">Latency</th>
@@ -217,6 +218,7 @@ export default function History() {
                       {new Date(item.created_at).toLocaleString()}
                     </td>
                     <td className="px-4 py-2">{item.source_type}</td>
+                    <td className="px-4 py-2 font-mono text-xs text-textMuted" title={item.input_hash}>{item.input_hash?.slice(0, 12) || "—"}</td>
                     <td className="px-4 py-2">{item.attack_type || "—"}</td>
                     <td className="px-4 py-2">
                       <DecisionPill decision={item.final_decision} />

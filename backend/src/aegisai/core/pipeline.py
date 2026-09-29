@@ -16,6 +16,7 @@ from aegisai.config import resolve_model_ids
 from aegisai.core import observability, policy_engine, sanitizer, session_tracker
 from aegisai.db.models import Inspection, User
 from aegisai.logging_ import get_logger
+from aegisai.parsers.image import OCRTimeoutError
 from aegisai.schemas import (
     AttackType,
     Decision,
@@ -43,6 +44,10 @@ class InputParseError(Exception):
 
 class ParserUnavailableError(Exception):
     """A parser's system dependency (e.g. the tesseract binary) is missing."""
+
+
+class ParserTimeoutError(Exception):
+    """A parser exceeded its bounded processing budget."""
 
 
 class _Tier2Loader:
@@ -125,6 +130,8 @@ async def _parse(request: FirewallRequest) -> ParsedInput:
         return await asyncio.to_thread(parsers.parse, request.text, request.source_type, metadata)
     except pytesseract.TesseractNotFoundError as exc:
         raise ParserUnavailableError(request.source_type.value) from exc
+    except OCRTimeoutError as exc:
+        raise ParserTimeoutError(request.source_type.value) from exc
     except Exception as exc:
         raise InputParseError(request.source_type.value) from exc
 

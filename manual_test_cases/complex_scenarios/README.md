@@ -64,3 +64,7 @@ Upload [`pdf-hidden-override.pdf`](../fixtures/pdf-hidden-override.pdf) and
 [`hidden-instruction.html`](../fixtures/hidden-instruction.html) as **HTML**.
 Together these show that invisible PDF text, document table cells, and hidden
 HTML comments are still parsed before a decision is made.
+
+## Long-form live demo library
+
+The Inspect page now includes a source-specific scenario selector with long synthetic cases for all 11 input components. Textual sources offer both paste and attachment modes; PDF, DOCX, and image cases point to the safe fixtures in `manual_test_cases/fixtures/`. The in-flight console shows parser, Tier 1, local semantic, Claude judge, and policy/audit stages with short field notes while preserving the locked Firewall JSON contract.
