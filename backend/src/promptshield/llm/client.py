@@ -4,6 +4,7 @@ import json
 import uuid
 
 import anthropic
+import httpx
 
 from promptshield.config import get_settings, resolve_model_ids
 from promptshield.llm.prompts import (
@@ -18,7 +19,7 @@ logger = get_logger(__name__)
 
 # Thinking and reasoning share this budget on models that think; a verdict is
 # ~60 tokens, so this leaves headroom without inviting long generations.
-_JUDGE_MAX_TOKENS = 1024
+_JUDGE_MAX_TOKENS = 256
 
 
 class AsyncAnthropicClient:
@@ -36,10 +37,17 @@ class AsyncAnthropicClient:
         max_retries: int | None = None,
     ) -> None:
         settings = get_settings()
+        timeout_value = timeout if timeout is not None else float(settings.claude_timeout_s)
+        # Desktop/corporate environments often set HTTP(S)_PROXY to a local
+        # gateway that is unavailable to Python. The judge calls Anthropic
+        # directly; an unreachable ambient proxy must not silently disable
+        # Tier 3 while a normal TLS connection is available.
+        self._http_client = httpx.AsyncClient(timeout=timeout_value, trust_env=False)
         self._client = anthropic.AsyncAnthropic(
             api_key=api_key or settings.anthropic_api_key or None,
-            timeout=timeout if timeout is not None else float(settings.claude_timeout_s),
+            timeout=timeout_value,
             max_retries=max_retries if max_retries is not None else settings.claude_max_retries,
+            http_client=self._http_client,
         )
 
     async def classify(

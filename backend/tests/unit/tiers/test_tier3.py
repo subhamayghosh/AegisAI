@@ -63,6 +63,14 @@ def _sent_body(route: respx.Route) -> dict:
     return json.loads(route.calls.last.request.content)
 
 
+async def test_judge_client_ignores_a_broken_machine_proxy() -> None:
+    client = AsyncAnthropicClient(api_key="test-key", max_retries=0)
+    try:
+        assert client._http_client._trust_env is False
+    finally:
+        await client._http_client.aclose()
+
+
 async def test_valid_json_verdict_is_parsed(respx_mock: respx.MockRouter) -> None:
     respx_mock.post(MESSAGES_URL).mock(return_value=httpx.Response(200, json=_message(_verdict())))
 

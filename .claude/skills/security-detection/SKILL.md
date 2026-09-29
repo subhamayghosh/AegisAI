@@ -108,14 +108,16 @@ reason (`judge timed out` / `judge unavailable` / `judge returned an invalid
 verdict`).
 
 - **Request shape** (`llm/client.py`): `system=JUDGE_SYSTEM_PROMPT`, one user
-  message from `build_judge_user_prompt()`, `max_tokens=1024`,
+  message from `build_judge_user_prompt()`, `max_tokens=256`,
   `output_config={"effort": "low", "format": {"type": "json_schema", "schema": JUDGE_OUTPUT_SCHEMA}}`.
   Low effort is what keeps the judge inside 5s; the schema makes the reply
   parseable. Do not add `temperature`/`top_p` — 400 on every judge model.
 - **Client** wraps `anthropic.AsyncAnthropic` (timeout / retries from
-  `CLAUDE_TIMEOUT_S` / `CLAUDE_MAX_RETRIES`, default 5s / 2). The API key
+  `CLAUDE_TIMEOUT_S` / `CLAUDE_MAX_RETRIES`, default 12s / 0). The API key
   comes from `ANTHROPIC_API_KEY` only — user settings carry model IDs, not
-  keys. `classify()` returns the parsed verdict dict, or `{}` on any failure
+  keys. Its dedicated `httpx.AsyncClient` sets `trust_env=False`, preventing
+  a broken machine-wide proxy from disabling direct Anthropic calls.
+  `classify()` returns the parsed verdict dict, or `{}` on any failure
   (timeout, connection, 429, other status, refusal stop reason, malformed
   JSON), each logged with a `correlation_id` shared with the tier's own logs.
   Logs carry ids, status codes, and `request_id` — never the inspected text.
