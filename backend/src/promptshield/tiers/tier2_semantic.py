@@ -242,7 +242,10 @@ CORPUS: list[tuple[str, AttackType]] = [
     ),
 ]
 
-_model = SentenceTransformer(_MODEL_NAME, device="cpu")
+# A Tier 2 request must never wait for Hugging Face networking. Deployments
+# pre-warm this small model during setup; if it is absent, the loader reports
+# Tier 2 unavailable while Tier 1 and Tier 3 continue to protect the request.
+_model = SentenceTransformer(_MODEL_NAME, device="cpu", local_files_only=True)
 _corpus_embeddings: np.ndarray = _model.encode(
     [text for text, _ in CORPUS], convert_to_numpy=True, normalize_embeddings=True
 )

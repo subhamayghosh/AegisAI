@@ -78,9 +78,9 @@ L2-normalized at encode time, so similarity is a plain dot product
 (`_top_match`) — no extra numerical-libraries dependency needed.
 
 - The model and corpus embeddings are computed **once at module import**,
-  not per call — importing this module downloads the model on first run
-  (cached under `~/.cache/huggingface` afterwards) and needs network access
-  once.
+  not per call. It loads with `local_files_only=True`, so the deployment must
+  pre-warm `~/.cache/huggingface` during setup; Tier 2 never waits on a
+  network download in the request path.
 - The threshold is read from `get_settings().tier2_threshold` on *every*
   call (not cached at import), so it's live-configurable — tests override
   it with `monkeypatch.setattr(get_settings(), "tier2_threshold", ...)`.
@@ -92,12 +92,10 @@ L2-normalized at encode time, so similarity is a plain dot product
 
 **Known environment gap:** this repo's default sandbox runs behind a
 corporate proxy that blocks `huggingface.co` outright (403, not just a
-cert issue), so `tier2_semantic.py` cannot be imported or its tests run
-there — verified by injecting a fake `SentenceTransformer` to confirm the
-thresholding/best-match control flow independent of the real model. Run
-`tests/unit/tiers/test_tier2.py` and `scripts/tune_tier2_thresholds.py` from
-a machine with real network access (or a pre-warmed HF cache) before
-trusting their output.
+cert issue). Tier 2 therefore requires a complete pre-warmed local cache;
+otherwise it immediately reports unavailable instead of retrying a download.
+Run `tests/unit/tiers/test_tier2.py` and `scripts/tune_tier2_thresholds.py`
+with an explicitly opted-in, pre-warmed cache before trusting their output.
 
 ## Tier 3 LLM judge (`tiers/tier3_llm_judge.py`, `llm/`)
 

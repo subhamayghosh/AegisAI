@@ -27,6 +27,12 @@ event.
 4. Select **Inspect**. Compare the displayed decision and tier signal with the
    expected result. Every run also appears in **History**.
 
+For the recommended realistic live demonstration, use the **Load probe**
+button in Inspect. It loads a complex input that intentionally avoids Tier 1's
+high-confidence short-circuit and therefore produces a Tier 1, Tier 2, and
+Tier 3 signal card. See the dedicated
+[`complex scenarios`](./complex_scenarios/README.md) guide.
+
 For Tier 2 scenarios, wait for the semantic model to warm up. For Tier 3
 scenarios, an `ANTHROPIC_API_KEY` and a permitted judge model are required.
 When either is unavailable, Inspect says so in the signal card; do not score

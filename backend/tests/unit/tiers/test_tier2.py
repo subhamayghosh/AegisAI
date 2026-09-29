@@ -1,9 +1,39 @@
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
 import pytest
 
 from promptshield.config import get_settings
 from promptshield.schemas import AttackType, SourceType
+
+# Direct Tier 2 tests exercise a real sentence-transformer when it is already
+# cached. Do not make the whole suite import the model (and spend minutes
+# retrying a download) on a laptop without its model/corporate CA chain.
+_hf_home = Path(os.environ.get("HF_HOME", Path.home() / ".cache" / "huggingface"))
+_hub_cache = Path(os.environ.get("HF_HUB_CACHE", _hf_home / "hub"))
+_snapshots = _hub_cache / "models--sentence-transformers--all-MiniLM-L6-v2" / "snapshots"
+_has_complete_snapshot = any(
+    (snapshot / "config.json").is_file()
+    and (
+        (snapshot / "model.safetensors").is_file()
+        or (snapshot / "pytorch_model.bin").is_file()
+    )
+    for snapshot in _snapshots.glob("*")
+    if snapshot.is_dir()
+)
+_run_real_model_tests = os.environ.get("PROMPTSHIELD_RUN_TIER2_MODEL_TESTS") == "1"
+if not _run_real_model_tests:
+    pytest.skip(
+        "set PROMPTSHIELD_RUN_TIER2_MODEL_TESTS=1 to run real embedding-model tests",
+        allow_module_level=True,
+    )
+if not _has_complete_snapshot:
+    pytest.skip("Tier 2 model is not cached locally", allow_module_level=True)
+
+# Keep direct tests offline even when a complete local snapshot exists.
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
 from promptshield.tiers import tier2_semantic
 
 

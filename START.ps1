@@ -62,6 +62,40 @@ function Remove-PromptShieldDevCache {
     }
 }
 
+function Get-ListeningProcess {
+    param(
+        [Parameter(Mandatory = $true)]
+        [int]$Port
+    )
+
+    $listener = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    if (-not $listener) {
+        return $null
+    }
+
+    return Get-Process -Id $listener.OwningProcess -ErrorAction SilentlyContinue
+}
+
+function Stop-ProcessTreeSafely {
+    param(
+        [System.Diagnostics.Process]$Process,
+        [string]$ServiceName
+    )
+
+    if (-not $Process -or $Process.HasExited) {
+        return
+    }
+
+    try {
+        # /T is needed for the uvicorn reloader and Vite's Node child process.
+        # A child may already have exited during Ctrl+C, which is not an error.
+        & taskkill /PID $Process.Id /T /F 2>$null | Out-Null
+    } catch {
+        Write-Host "$ServiceName already stopped; continuing cleanup." -ForegroundColor DarkGray
+    }
+}
+
 Write-Host "PromptShield - starting backend + frontend" -ForegroundColor Cyan
 
 # --- 1. Backend .env (local SQLite dev default if missing) ------------------
@@ -123,37 +157,65 @@ if (-not $SkipInstall -and -not (Test-Path $FrontendNodeModules)) {
 }
 
 # --- 4. Launch backend + frontend as hidden child processes ------------------
-Write-Host "Launching backend on http://127.0.0.1:8000 ..." -ForegroundColor Green
-$backendProcess = Start-Process -FilePath $Python -ArgumentList @(
-    "-m", "uvicorn", "--app-dir", "src", "promptshield.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000"
-) -WorkingDirectory $BackendDir -PassThru -WindowStyle Hidden
+$backendProcess = Get-ListeningProcess -Port 8000
+$frontendProcess = Get-ListeningProcess -Port 3000
+$ownsBackend = $false
+$ownsFrontend = $false
 
-Write-Host "Launching frontend on http://localhost:3000 ..." -ForegroundColor Green
-$npmCommand = (Get-Command npm.cmd -ErrorAction Stop).Source
-$frontendProcess = Start-Process -FilePath $npmCommand -ArgumentList @(
-    "run", "dev", "--", "--host", "127.0.0.1", "--port", "3000"
-) -WorkingDirectory $FrontendDir -PassThru -WindowStyle Hidden
+if ($backendProcess) {
+    Write-Host "Backend already serves port 8000 (PID $($backendProcess.Id)); reusing it." -ForegroundColor Yellow
+} else {
+    Write-Host "Launching backend on http://127.0.0.1:8000 ..." -ForegroundColor Green
+    $backendProcess = Start-Process -FilePath $Python -ArgumentList @(
+        "-m", "uvicorn", "--app-dir", "src", "promptshield.main:app", "--reload", "--host", "127.0.0.1", "--port", "8000"
+    ) -WorkingDirectory $BackendDir -PassThru -WindowStyle Hidden
+    $ownsBackend = $true
+}
+
+if ($frontendProcess) {
+    Write-Host "Frontend already serves port 3000 (PID $($frontendProcess.Id)); reusing it." -ForegroundColor Yellow
+} else {
+    Write-Host "Launching frontend on http://localhost:3000 ..." -ForegroundColor Green
+    $npmCommand = (Get-Command npm.cmd -ErrorAction Stop).Source
+    $frontendProcess = Start-Process -FilePath $npmCommand -ArgumentList @(
+        "run", "dev", "--", "--host", "127.0.0.1", "--port", "3000"
+    ) -WorkingDirectory $FrontendDir -PassThru -WindowStyle Hidden
+    $ownsFrontend = $true
+}
 
 Write-Host ""
 Write-Host "Backend:  http://127.0.0.1:8000  (health check: http://127.0.0.1:8000/health)" -ForegroundColor Cyan
 Write-Host "Frontend: http://localhost:3000" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Both services are running (PIDs: backend=$($backendProcess.Id), frontend=$($frontendProcess.Id))." -ForegroundColor Cyan
-Write-Host "Press Ctrl+C or close this PowerShell window to stop services and remove local development caches." -ForegroundColor Cyan
+Write-Host "Both services are available (PIDs: backend=$($backendProcess.Id), frontend=$($frontendProcess.Id))." -ForegroundColor Cyan
+if ($ownsBackend -or $ownsFrontend) {
+    Write-Host "Press Ctrl+C or close this PowerShell window to stop services launched here and remove local development caches." -ForegroundColor Cyan
+} else {
+    Write-Host "Press Ctrl+C or close this PowerShell window to detach; reused services will remain running." -ForegroundColor Cyan
+}
 
 # --- 5. Keep this script alive; stop both (incl. their child processes, e.g.
 #        uvicorn/node under each PowerShell window) as soon as either exits ---
 try {
-    while (-not $backendProcess.HasExited -and -not $frontendProcess.HasExited) {
+    while ($true) {
+        if ($ownsBackend -and $backendProcess.HasExited) {
+            throw "Backend exited unexpectedly. Check its startup configuration or port 8000."
+        }
+        if ($ownsFrontend -and $frontendProcess.HasExited) {
+            throw "Frontend exited unexpectedly. Check its startup configuration or port 3000."
+        }
         Start-Sleep -Seconds 1
     }
 } finally {
     Write-Host ""
     Write-Host "Stopping backend and frontend..." -ForegroundColor Yellow
-    foreach ($p in @($backendProcess, $frontendProcess)) {
-        if ($p -and -not $p.HasExited) {
-            & taskkill /PID $p.Id /T /F 2>$null | Out-Null
-        }
+    if ($ownsBackend) {
+        Stop-ProcessTreeSafely -Process $backendProcess -ServiceName "Backend"
     }
-    Remove-PromptShieldDevCache
+    if ($ownsFrontend) {
+        Stop-ProcessTreeSafely -Process $frontendProcess -ServiceName "Frontend"
+    }
+    if ($ownsBackend -or $ownsFrontend) {
+        Remove-PromptShieldDevCache
+    }
 }

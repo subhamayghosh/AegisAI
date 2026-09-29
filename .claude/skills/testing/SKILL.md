@@ -26,6 +26,16 @@ Use this skill for anything under `backend/tests/` or `frontend/tests/`. Covers 
   hidden content surfaces at all, via a Tier 1 flag) will often contain a
   0.95-confidence phrase that short-circuits straight to BLOCK, which is the
   wrong outcome for a scenario that wants to exercise NEUTRALIZE.
+
+## Tier 2 model availability
+
+`tests/unit/tiers/test_tier2.py` runs the real encoder only when
+`PROMPTSHIELD_RUN_TIER2_MODEL_TESTS=1` is explicitly set and a complete local
+Hugging Face snapshot is present. Ordinary/CI runs record one clear
+module-level skip, instead of retrying a model download during collection.
+That skip is an environment dependency, not evidence that the semantic tier
+passed. Restore the machine's CA chain or pre-warm the model cache, then run
+the opt-in suite before claiming live Tier 2 verification.
 - Test clients use `httpx.AsyncClient` inside `app.router.lifespan_context(app)`
   so startup/shutdown behavior is exercised with each fresh SQLite test
   server. The autouse fixture stubs `pipeline.warm_up()` to prevent a Hugging

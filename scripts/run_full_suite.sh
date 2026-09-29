@@ -58,7 +58,7 @@ _wait_for_url() {
 }
 
 echo "=== Starting backend (uvicorn on :${BACKEND_PORT}) ==="
-(cd "$ROOT_DIR/backend" && "$BACKEND_PYTHON" -m uvicorn promptshield.main:app --host "$BACKEND_HOST" --port "$BACKEND_PORT" \
+(cd "$ROOT_DIR/backend" && "$BACKEND_PYTHON" -m uvicorn --app-dir src promptshield.main:app --host "$BACKEND_HOST" --port "$BACKEND_PORT" \
     > "$ROOT_DIR/backend.full_suite.log" 2>&1) &
 BACKEND_PID=$!
 
