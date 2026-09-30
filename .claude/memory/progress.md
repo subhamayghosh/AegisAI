@@ -43,3 +43,4 @@
 2026-09-30 07:40  Codex  Raised Live Inspection Console contrast and text sizing, added a bounded scrollable trace region, and stopped long inspections from repeating the final policy-stage message.
 2026-09-30 08:00  Codex  Restored primary navigation on narrow portal layouts and added accessible client-side UUID validation so malformed Inspect session IDs are no longer reported as parser failures.
 2026-09-30 12:10  Codex  Added an Alembic upgrade step to the CI workflow so the live SQLite backend has its schema before the regression corpus runs.
+2026-09-30 12:25  Codex  Restored the README portal walkthrough GIF reference using the tracked archived asset path.
