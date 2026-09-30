@@ -4,6 +4,12 @@ This is a live demo, not a video or a pre-recorded dashboard. The centrepiece
 is one realistic message that tries to steer an AI agent and is stopped before
 it reaches the model.
 
+The Dashboard's **Launch live demo** button opens the Inspect threat lab and
+starts a guided replay of synthetic cases. The replay keeps the scenario queue,
+current decision, progress, and live pipeline console together on one screen.
+Use **Stop after this check** if the audience wants to pause and inspect a
+result; the main narrative below remains the recommended featured case.
+
 For exact clicks and pre-flight checks, use the
 [manual live demo runbook](../manual_test_cases/LIVE_DEMO_RUNBOOK.md).
 

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import Dashboard from "../src/pages/Dashboard";
 
 vi.mock("../src/hooks/useAuth", () => ({
@@ -22,26 +23,22 @@ vi.mock("../src/api/sessions", () => ({
   listSessions: vi.fn(),
   getSession: vi.fn(),
 }));
-vi.mock("../src/api/firewall", () => ({
-  inspect: vi.fn(),
-}));
-
-vi.mock("../src/utils/delay", () => ({
-  delay: vi.fn().mockResolvedValue(undefined),
-}));
-
 import * as historyApi from "../src/api/history";
 import * as sessionsApi from "../src/api/sessions";
-import * as firewallApi from "../src/api/firewall";
 
 function renderDashboard() {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false, refetchInterval: false } },
   });
   return render(
-    <QueryClientProvider client={queryClient}>
-      <Dashboard />
-    </QueryClientProvider>
+    <MemoryRouter initialEntries={["/dashboard"]}>
+      <QueryClientProvider client={queryClient}>
+        <Routes>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/inspect" element={<div data-testid="inspect-route">Inspect route</div>} />
+        </Routes>
+      </QueryClientProvider>
+    </MemoryRouter>
   );
 }
 
@@ -78,26 +75,14 @@ describe("Dashboard", () => {
     expect(within(screen.getByTestId("stat-Allowed")).getByText("1")).toBeInTheDocument();
   });
 
-  it("fires 15 scripted requests when Run demo mode is clicked", async () => {
+  it("opens the guided live demo in Inspect when launched from the dashboard", async () => {
     historyApi.listHistory.mockResolvedValue({ items: [], total: 0, page: 1, page_size: 50 });
-    firewallApi.inspect.mockResolvedValue({
-      input_id: "i1",
-      session_id: "s1",
-      turn_id: 1,
-      final_decision: "ALLOW",
-      tier_signals: [],
-      session_suspicion_score: 0,
-      reason: "ok",
-      working_model_id: "claude-sonnet-5",
-      judge_model_id: "claude-opus-4-7",
-      latency_ms_total: 10,
-    });
 
     renderDashboard();
 
-    const button = await screen.findByRole("button", { name: /run demo mode/i });
+    const button = await screen.findByRole("button", { name: /launch live demo/i });
     fireEvent.click(button);
 
-    await waitFor(() => expect(firewallApi.inspect).toHaveBeenCalledTimes(15));
+    expect(await screen.findByTestId("inspect-route")).toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import Inspect from "../src/pages/Inspect";
 
 vi.mock("../src/hooks/useToast", () => ({
@@ -12,11 +13,19 @@ vi.mock("../src/api/firewall", () => ({
 
 import * as firewallApi from "../src/api/firewall";
 
+function renderInspect() {
+  return render(
+    <MemoryRouter initialEntries={["/inspect"]}>
+      <Inspect />
+    </MemoryRouter>
+  );
+}
+
 beforeEach(() => vi.clearAllMocks());
 
 describe("Inspect demo inputs", () => {
   it("loads a long source-specific scenario", () => {
-    render(<Inspect />);
+    renderInspect();
 
     fireEvent.change(screen.getByLabelText(/complex demo scenario/i), {
       target: { value: "email-finance" },
@@ -27,7 +36,7 @@ describe("Inspect demo inputs", () => {
   });
 
   it("offers an attachment mode for HTML and email-style sources", () => {
-    render(<Inspect />);
+    renderInspect();
 
     fireEvent.change(screen.getByLabelText(/source type/i), {
       target: { value: "html" },

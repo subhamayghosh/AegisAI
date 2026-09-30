@@ -40,7 +40,9 @@ examples for user messages, PDFs, and images—see
 
 1. **Dashboard** is the live control room. It shows total, allowed,
    neutralized, and blocked inspections; the latest event feed; attack
-   breakdown; and the most recent session score.
+   breakdown; and the most recent session score. **Launch live demo** opens a
+   guided replay in Inspect with a scenario queue, progress, stop/replay
+   controls, and a live trace for each synthetic inspection.
 2. **Inspect** is the manual test console. Pick one of the 11 source types,
    paste content or upload PDF/DOCX/image, and read the decision plus every
    tier's signal. It can also reuse a Session ID and increment a turn number

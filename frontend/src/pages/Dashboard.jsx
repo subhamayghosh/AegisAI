@@ -1,27 +1,22 @@
-import { useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, Loader2, Play, ShieldAlert, ShieldBan, ShieldCheck } from "lucide-react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Activity, ArrowRight, ShieldAlert, ShieldBan, ShieldCheck, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { useToast } from "../hooks/useToast";
 import * as adminApi from "../api/admin";
-import * as firewallApi from "../api/firewall";
 import * as historyApi from "../api/history";
 import * as sessionsApi from "../api/sessions";
 import StatCard from "../components/StatCard";
 import EventFeed from "../components/EventFeed";
 import AttackBreakdown from "../components/AttackBreakdown";
 import SessionExplorer from "../components/SessionExplorer";
-import { DEMO_ATTACKS } from "../demoAttacks";
-import { delay } from "../utils/delay";
 
 const POLL_MS = 2000;
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const toast = useToast();
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const isAdmin = user?.role === "admin";
-  const [demoRunning, setDemoRunning] = useState(false);
 
   const metricsQuery = useQuery({
     queryKey: ["admin-metrics"],
@@ -115,35 +110,6 @@ export default function Dashboard() {
     }));
   }, [isAdmin, adminEventsQuery.data, historyQuery.data]);
 
-  const runDemoMode = async () => {
-    setDemoRunning(true);
-    const sessionId = crypto.randomUUID();
-    try {
-      for (let i = 0; i < DEMO_ATTACKS.length; i++) {
-        await firewallApi.inspect({
-          input_id: crypto.randomUUID(),
-          session_id: sessionId,
-          turn_id: i + 1,
-          text: DEMO_ATTACKS[i].text,
-          source_type: DEMO_ATTACKS[i].source_type,
-          metadata: { demo_label: DEMO_ATTACKS[i].label },
-        });
-        queryClient.invalidateQueries({ queryKey: ["admin-metrics"] });
-        queryClient.invalidateQueries({ queryKey: ["admin-events"] });
-        queryClient.invalidateQueries({ queryKey: ["history-feed"] });
-        queryClient.invalidateQueries({ queryKey: ["sessions-recent"] });
-        if (i < DEMO_ATTACKS.length - 1) {
-          await delay(1000);
-        }
-      }
-      toast.success("Demo mode finished — 15 scripted inspections sent.");
-    } catch {
-      toast.error("Demo mode failed partway through. Please try again.");
-    } finally {
-      setDemoRunning(false);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/10 via-surface to-cyan-400/10 p-6 shadow-sm sm:p-7">
@@ -154,19 +120,22 @@ export default function Dashboard() {
             <h1 className="mt-1 text-2xl font-semibold tracking-tight">Protection at a glance</h1>
             <p className="mt-1 text-sm text-textMuted">Monitor every decision, then trace the signals behind it.</p>
           </div>
-        <button
-          type="button"
-          onClick={runDemoMode}
-          disabled={demoRunning}
-          className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/25 transition hover:-translate-y-0.5 hover:bg-primaryHover disabled:translate-y-0 disabled:opacity-60"
-        >
-          {demoRunning ? (
-            <Loader2 className="animate-spin" size={16} aria-hidden="true" />
-          ) : (
-            <Play size={16} aria-hidden="true" />
-          )}
-          {demoRunning ? "Running demo…" : "Run demo mode"}
-        </button>
+          <button
+            type="button"
+            onClick={() => navigate("/inspect?demo=1&autostart=1")}
+            className="group flex shrink-0 items-center justify-center gap-3 rounded-2xl bg-slate-950 px-4 py-3 text-left text-white shadow-lg shadow-indigo-500/25 transition hover:-translate-y-0.5 hover:bg-slate-900 dark:bg-indigo-500 dark:hover:bg-indigo-400"
+          >
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-white/15 text-cyan-200">
+              <Sparkles size={18} aria-hidden="true" />
+            </span>
+            <span>
+              <span className="flex items-center gap-2 text-sm font-semibold">
+                Launch live demo
+                <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+              </span>
+              <span className="mt-0.5 block text-xs font-normal text-slate-300 dark:text-indigo-100">Guided replay in the threat lab</span>
+            </span>
+          </button>
         </div>
       </div>
 
