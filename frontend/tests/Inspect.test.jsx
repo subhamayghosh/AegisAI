@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import Inspect from "../src/pages/Inspect";
 
 vi.mock("../src/hooks/useToast", () => ({
@@ -14,6 +14,10 @@ import * as firewallApi from "../src/api/firewall";
 
 beforeEach(() => {
   vi.clearAllMocks();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("Inspect", () => {
@@ -76,5 +80,25 @@ describe("Inspect", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("regex:ignore_previous_instructions")).toBeInTheDocument();
     expect(screen.getByText("95%")).toBeInTheDocument();
+  });
+
+  it("writes every live pipeline stage once while a slow inspection is pending", async () => {
+    vi.useFakeTimers();
+    firewallApi.inspect.mockReturnValue(new Promise(() => {}));
+
+    render(<Inspect />);
+    fireEvent.change(screen.getByLabelText(/content/i), {
+      target: { value: "Inspect this synthetic security probe." },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /^inspect$/i }));
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10000);
+    });
+
+    const trace = screen.getByRole("log", { name: /inspection trace output/i });
+    expect(trace).toHaveTextContent("parse: Reading the selected source boundary");
+    expect(trace.querySelectorAll("div")).toHaveLength(7);
+    expect(trace.textContent.match(/policy: Combining signals, sanitizing, and recording a hash/g)).toHaveLength(1);
   });
 });

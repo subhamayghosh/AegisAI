@@ -79,14 +79,24 @@ export default function Inspect() {
   const startConsole = () => {
     window.clearInterval(progressTimer.current);
     window.clearInterval(quoteTimer.current);
-    setConsoleEntries(["$ aegis inspect --live-trace", "$ authenticated request accepted"]);
+    setConsoleEntries([
+      "$ aegis inspect --live-trace",
+      "$ authenticated request accepted",
+      `${stages[0][0]}: ${stages[0][2]}`,
+    ]);
     setProgressStep(0);
     setQuoteIndex(0);
     let nextStep = 0;
     progressTimer.current = window.setInterval(() => {
-      nextStep = Math.min(nextStep + 1, stages.length - 1);
-      setProgressStep(nextStep);
-      setConsoleEntries((items) => [...items, `${stages[nextStep][0]}: ${stages[nextStep][2]}`]);
+      if (nextStep >= stages.length - 1) {
+        window.clearInterval(progressTimer.current);
+        return;
+      }
+      nextStep += 1;
+      const stageIndex = nextStep;
+      const stageEntry = `${stages[stageIndex][0]}: ${stages[stageIndex][2]}`;
+      setProgressStep(stageIndex);
+      setConsoleEntries((items) => [...items, stageEntry]);
     }, 720);
     quoteTimer.current = window.setInterval(() => {
       setQuoteIndex((index) => (index + 1) % INSPECTION_QUOTES.length);

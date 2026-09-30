@@ -63,3 +63,5 @@ Backend routers have no `/api` prefix (e.g. `/auth/login`, not `/api/auth/login`
 ## Live Inspect console and demo scenarios
 
 `pages/Inspect.jsx` supports both paste and attachment modes for every source type. Textual sources (including HTML and email) may be pasted or attached; binary sources remain attachment-first and are base64 encoded in memory. `demoScenarios.js` is the source of truth for long, synthetic, source-specific prompts. `InspectionConsole.jsx` renders an accessible staged trace and rotates short credited field notes while the existing JSON inspection request is in flight; it must not expose raw input or secrets in logs.
+
+Keep the live console's stage details, trace output, and quote attribution at high contrast on its dark navy surface (`slate-300` or brighter). Log each pipeline stage once, stop the progress timer after the policy stage, and expose trace lines through the labelled `role="log"` region so long-running inspections remain readable without producing duplicate terminal entries.
