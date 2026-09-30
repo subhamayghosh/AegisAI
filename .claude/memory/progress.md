@@ -42,3 +42,4 @@
 2026-09-30 06:13  Codex  Added bounded Claude Vision OCR fallback for hosts without Tesseract, aligned the long-document judge deadline with configured Anthropic timeout, generated an 11-source complex manual fixture pack with hidden/Unicode content, and verified all 11 live cases through configured Claude models.
 2026-09-30 07:40  Codex  Raised Live Inspection Console contrast and text sizing, added a bounded scrollable trace region, and stopped long inspections from repeating the final policy-stage message.
 2026-09-30 08:00  Codex  Restored primary navigation on narrow portal layouts and added accessible client-side UUID validation so malformed Inspect session IDs are no longer reported as parser failures.
+2026-09-30 12:10  Codex  Added an Alembic upgrade step to the CI workflow so the live SQLite backend has its schema before the regression corpus runs.

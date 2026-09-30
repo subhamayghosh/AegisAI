@@ -62,6 +62,10 @@ jobs:
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
+      - name: Initialize database schema
+        working-directory: backend
+        run: python -m alembic upgrade head
+
       - name: Run full suite (backend pytest + regression corpus + frontend vitest)
         run: bash scripts/run_full_suite.sh
 
