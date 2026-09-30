@@ -26,7 +26,7 @@ never stores raw inspected text.
 
 ## Screenshots
 
-![AegisAI portal walkthrough](./docs/_archive/pre-aegisai-portal-walkthrough.gif)
+![AegisAI portal walkthrough](./docs/assets/aegisai-portal-walkthrough.gif)
 
 Start the local app with `START.ps1` to view the rebranded dashboard, decision
 feed, attack coverage, and session context.

@@ -44,3 +44,4 @@
 2026-09-30 08:00  Codex  Restored primary navigation on narrow portal layouts and added accessible client-side UUID validation so malformed Inspect session IDs are no longer reported as parser failures.
 2026-09-30 12:10  Codex  Added an Alembic upgrade step to the CI workflow so the live SQLite backend has its schema before the regression corpus runs.
 2026-09-30 12:25  Codex  Restored the README portal walkthrough GIF reference using the tracked archived asset path.
+2026-09-30 13:00  Codex  Regenerated the README portal walkthrough GIF from the current AegisAI dashboard and updated the asset reference for the rebranded UI.
