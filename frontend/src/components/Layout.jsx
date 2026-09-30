@@ -38,10 +38,11 @@ export default function Layout() {
                 onClick={() => setMenuOpen((v) => !v)}
                 aria-haspopup="true"
                 aria-expanded={menuOpen}
-                aria-label="Open user menu"
+                aria-label={menuOpen ? "Close user menu" : "Open user menu"}
                 className="flex items-center gap-2 rounded-xl border border-border bg-surfaceAlt/70 px-3 py-2 text-sm transition hover:bg-surface"
               >
-                <span>{user?.display_name || "Account"}</span>
+                <User size={16} aria-hidden="true" />
+                <span className="hidden sm:inline">{user?.display_name || "Account"}</span>
                 <ChevronDown size={14} aria-hidden="true" />
               </button>
               {menuOpen && (
@@ -86,6 +87,11 @@ export default function Layout() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+        <div className="border-t border-border/70 px-4 py-2 md:hidden sm:px-6">
+          <div className="mx-auto w-full max-w-[90rem]">
+            <Nav mobile />
           </div>
         </div>
       </header>
