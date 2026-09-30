@@ -1388,7 +1388,7 @@ Implement backend/src/aegisai/tiers/tier2_semantic.py:
 - Load sentence-transformers/all-MiniLM-L6-v2 (runs on CPU) from the
   local Hugging Face cache or TIER2_MODEL_PATH; never download on a
   request path.
-- Precompute embeddings at module import for a corpus of 57 attack
+- Precompute embeddings at module import for a corpus of 147 attack
   paraphrases across all 9 types. Store the
   corpus as a Python list of (text, attack_type) tuples inside the
   file for auditability.

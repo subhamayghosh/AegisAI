@@ -145,6 +145,12 @@ npm install
 npm run dev                        # http://localhost:3000
 ```
 
+On Windows, a teammate can run `SETUP_AEGISAI.bat` once from the repository
+root. It creates `backend/.venv` if needed, installs both dependency sets,
+builds the frontend, and preloads the complete Tier 2 reference index. The
+script requires each developer to create their own untracked `.env` first; it
+never copies or generates secrets.
+
 Testing (see [`.claude/skills/testing/SKILL.md`](./.claude/skills/testing/SKILL.md)):
 
 ```bash
@@ -169,7 +175,7 @@ is hard-coded. Full reference: [§17 of the playbook](./AEGISAI_PLAYBOOK.md#17-e
 | `OCR_TIMEOUT_S` / `OCR_MAX_DIMENSION` | Local Tesseract process and image-size limits |
 | `OCR_VISION_FALLBACK` / `OCR_VISION_TIMEOUT_S` / `OCR_VISION_MAX_DIMENSION` | Bounded Claude Vision fallback when Tesseract is unavailable |
 | `TIER2_MODEL_NAME` / `TIER2_MODEL_PATH` | Local Tier 2 encoder ID or pre-baked model directory |
-| `TIER2_THRESHOLD` / `SESSION_JAILBREAK_THRESHOLD` | Detection thresholds |
+| `TIER2_THRESHOLD` / `TIER2_LOAD_TIMEOUT_S` / `TIER2_STARTUP_TIMEOUT_S` / `SESSION_JAILBREAK_THRESHOLD` | Tier 2 similarity, request/startup readiness waits, and session thresholds |
 | `RATE_LIMIT_LOGIN_PER_MIN` / `RATE_LIMIT_INSPECT_PER_MIN` | Per-IP / per-user rate limits |
 | `CORS_ALLOWED_ORIGINS` | No wildcard, ever — see [security rules](./.claude/rules/security-rules.md) |
 | `SEED_ADMIN_PASSWORD` | Used only by `scripts/seed_db.py` |

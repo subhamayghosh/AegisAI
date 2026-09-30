@@ -71,7 +71,7 @@ automatically — no separate list to maintain in `sanitizer.py`.
 
 `detect(text, source_type) -> TierSignal` embeds `text` with the local
 `sentence-transformers/all-MiniLM-L6-v2` encoder (CPU) and compares it via
-cosine similarity against `CORPUS` — 57 hand-written attack paraphrases
+cosine similarity against `CORPUS` — 147 hand-written attack paraphrases
 across all 9 types (unlike Tier 1, which only covers the 6 literally-regexable
 ones). Both the corpus and query embeddings are L2-normalized. Linux/GHA/
 container installs search them through a FAISS `IndexFlatIP`; Windows/macOS
@@ -87,6 +87,12 @@ not a replacement for the embedding encoder.
 - The threshold is read from `get_settings().tier2_threshold` on *every*
   call (not cached at import), so it's live-configurable — tests override
   it with `monkeypatch.setattr(get_settings(), "tier2_threshold", ...)`.
+- The backend starts the loader during application startup and waits up to
+  `tier2_startup_timeout_s` (default 180 seconds) before serving requests;
+  this covers slow cold Windows imports of MiniLM plus the reference index.
+  Requests also wait up to `tier2_load_timeout_s` (default 15 seconds) if a
+  loader is still in flight. A failed load remains an explicit
+  `tier2_unavailable` signal.
 - `top_similarity(text, source_type)` returns the raw similarity with no
   thresholding applied — `scripts/tune_tier2_thresholds.py` uses this to
   sweep candidate thresholds without re-embedding the corpus per candidate.

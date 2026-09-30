@@ -12,8 +12,11 @@ Examples:
 from __future__ import annotations
 
 import os
+import sys
+from pathlib import Path
 
 import numpy as np
+from dotenv import dotenv_values
 from sentence_transformers import SentenceTransformer
 
 _DEFAULT_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
@@ -23,11 +26,32 @@ def _as_bool(value: str | None) -> bool:
     return (value or "").strip().lower() in {"1", "true", "yes", "on"}
 
 
-def main() -> None:
-    source = os.environ.get("TIER2_MODEL_PATH", "").strip() or os.environ.get(
-        "TIER2_MODEL_NAME", _DEFAULT_MODEL
+def _configured_value(name: str) -> str:
+    """Read an explicit process value or the nearest project .env value."""
+    value = os.environ.get(name, "").strip()
+    if value:
+        return value
+
+    project_root = Path(__file__).resolve().parents[1]
+    candidates = (
+        Path.cwd() / ".env",
+        project_root / ".env",
+        project_root / "backend" / ".env",
     )
-    local_only = _as_bool(os.environ.get("TIER2_PREWARM_LOCAL_ONLY"))
+    for env_path in candidates:
+        if not env_path.is_file():
+            continue
+        value = str(dotenv_values(env_path).get(name) or "").strip()
+        if value:
+            return value
+    return ""
+
+
+def main() -> None:
+    model_path = _configured_value("TIER2_MODEL_PATH")
+    model_name = _configured_value("TIER2_MODEL_NAME") or _DEFAULT_MODEL
+    source = model_path or model_name
+    local_only = _as_bool(_configured_value("TIER2_PREWARM_LOCAL_ONLY"))
     model = SentenceTransformer(source, device="cpu", local_files_only=local_only)
     vectors = model.encode(
         ["AegisAI Tier 2 warm-up probe"],
@@ -45,8 +69,22 @@ def main() -> None:
     except ImportError:
         pass
 
+    # Import the real detector after the model has been cached. This builds
+    # the same 147-reference corpus/index the backend uses at runtime rather
+    # than validating only a single warm-up vector.
+    backend_src = Path(__file__).resolve().parents[1] / "backend" / "src"
+    sys.path.insert(0, str(backend_src))
+    os.environ.setdefault("TIER2_MODEL_NAME", model_name)
+    if model_path:
+        os.environ.setdefault("TIER2_MODEL_PATH", model_path)
+    from aegisai.tiers import tier2_semantic
+
     print(
-        f"Tier 2 ready: source={source!r}, index={index_backend}, local_only={local_only}"
+        "Tier 2 ready: "
+        f"source={source!r}, "
+        f"index={tier2_semantic.INDEX_BACKEND or index_backend}, "
+        f"reference_fingerprints={len(tier2_semantic.CORPUS)}, "
+        f"local_only={local_only}"
     )
 
 

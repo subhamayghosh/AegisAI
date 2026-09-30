@@ -51,6 +51,8 @@ class Settings(BaseSettings):
     tier2_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
     tier2_model_path: str = ""
     tier2_threshold: float = 0.75
+    tier2_load_timeout_s: float = 15.0
+    tier2_startup_timeout_s: float = 180.0
     session_jailbreak_threshold: float = 0.70
 
     # Rate limits
