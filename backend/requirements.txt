@@ -17,6 +17,10 @@ python-dotenv
 # Keep the async HTTP transport compatible with respx-based tests.
 anthropic>=0.40,<1
 sentence-transformers
+# FAISS is the local Tier 2 similarity index on Linux/GHA/container hosts.
+# The detector has a NumPy fallback for Windows/macOS where a wheel may not
+# be available, so the application remains portable across developer systems.
+faiss-cpu>=1.8; platform_system == "Linux"
 pypdf
 # Generates realistic PDF payloads for parser and end-to-end tests.
 reportlab

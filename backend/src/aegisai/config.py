@@ -45,6 +45,11 @@ class Settings(BaseSettings):
     ocr_vision_max_dimension: int = 1568
 
     # Tier thresholds
+    # Tier 2 is an offline local encoder + vector index.  Deployments can
+    # point at a pre-baked local model directory to avoid relying on the
+    # Hugging Face service after startup.
+    tier2_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+    tier2_model_path: str = ""
     tier2_threshold: float = 0.75
     session_jailbreak_threshold: float = 0.70
 

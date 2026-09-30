@@ -26,10 +26,15 @@ never stores raw inspected text.
 
 ## Screenshots
 
-![AegisAI portal walkthrough](./docs/_archive/pre-aegisai-portal-walkthrough.gif)
+![AegisAI portal walkthrough](./docs/assets/aegisai-portal-walkthrough.gif)
 
 Start the local app with `START.ps1` to view the rebranded dashboard, decision
 feed, attack coverage, and session context.
+
+For the full AI-engineering walkthrough—backend components, parser paths,
+exact Claude call boundaries, FAISS/Tier 2 behavior, privacy flow, and live
+examples for user messages, PDFs, and images—see
+[`docs/AI_ENGINEERING_FLOW.md`](./docs/AI_ENGINEERING_FLOW.md).
 
 ## Use the portal
 
@@ -114,12 +119,19 @@ pip install -r requirements.txt
 # Vision OCR fallback when OCR_VISION_FALLBACK=true. Images are resized before
 # either engine runs, and both paths have explicit time limits.
 
-# The Tier 2 semantic detector (backend/src/aegisai/tiers/tier2_semantic.py)
-# downloads sentence-transformers/all-MiniLM-L6-v2 (~90MB) from Hugging Face
-# on first import, then caches it under ~/.cache/huggingface — it needs
-# network access to huggingface.co exactly once. On a machine/proxy that
-# blocks that host, importing the module (and therefore
-# tests/unit/tiers/test_tier2.py and scripts/tune_tier2_thresholds.py) fails.
+# Tier 2 uses a local sentence-transformers/all-MiniLM-L6-v2 encoder plus a
+# FAISS IndexFlatIP vector index on Linux/GHA/Docker. FAISS is the similarity
+# index, not an embedding model. Windows/macOS remain supported with the
+# equivalent NumPy search when a FAISS wheel is unavailable.
+#
+# Provision the encoder once before starting the app. Runtime loading is
+# local-only, so an inspection never waits for Hugging Face:
+python ../scripts/prewarm_tier2.py
+# To verify an already-cached/offline installation:
+TIER2_PREWARM_LOCAL_ONLY=1 python ../scripts/prewarm_tier2.py
+# PowerShell equivalent:
+# $env:TIER2_PREWARM_LOCAL_ONLY='1'; python ../scripts/prewarm_tier2.py
+# For a pre-baked local model directory, set TIER2_MODEL_PATH in .env.
 cp ../.env.example ../.env         # fill in ANTHROPIC_API_KEY
 alembic upgrade head
 python ../scripts/seed_db.py
@@ -154,6 +166,7 @@ is hard-coded. Full reference: [§17 of the playbook](./AEGISAI_PLAYBOOK.md#17-e
 | `CLAUDE_WORKING_MODEL` / `CLAUDE_JUDGE_MODEL` | App-default model IDs — overridable per-user from Settings |
 | `OCR_TIMEOUT_S` / `OCR_MAX_DIMENSION` | Local Tesseract process and image-size limits |
 | `OCR_VISION_FALLBACK` / `OCR_VISION_TIMEOUT_S` / `OCR_VISION_MAX_DIMENSION` | Bounded Claude Vision fallback when Tesseract is unavailable |
+| `TIER2_MODEL_NAME` / `TIER2_MODEL_PATH` | Local Tier 2 encoder ID or pre-baked model directory |
 | `TIER2_THRESHOLD` / `SESSION_JAILBREAK_THRESHOLD` | Detection thresholds |
 | `RATE_LIMIT_LOGIN_PER_MIN` / `RATE_LIMIT_INSPECT_PER_MIN` | Per-IP / per-user rate limits |
 | `CORS_ALLOWED_ORIGINS` | No wildcard, ever — see [security rules](./.claude/rules/security-rules.md) |
@@ -163,7 +176,7 @@ is hard-coded. Full reference: [§17 of the playbook](./AEGISAI_PLAYBOOK.md#17-e
 
 Every inspection flows: rate limiter → parser (by source type) → Tier 1
 regex + encoded-payload decoder → short-circuit on high confidence →
-Tier 2 semantic embedding → Tier 3 LLM judge (with session context) →
+Tier 2 local MiniLM embedding + FAISS similarity search → Tier 3 LLM judge (with session context) →
 session suspicion update → policy engine (`ALLOW` / `NEUTRALIZE` / `BLOCK`)
 → sanitizer → persisted to history + audit log (hash only by default).
 

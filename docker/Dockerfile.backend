@@ -17,6 +17,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ ./
 RUN pip install --no-cache-dir .
 
+# Bake the small Tier 2 encoder into the image at build time. Runtime imports
+# are local-only, so a running container does not depend on Hugging Face
+# availability. The build needs network access once, or an upstream image
+# layer/cache containing the model.
+COPY scripts/prewarm_tier2.py ./scripts/prewarm_tier2.py
+RUN python ./scripts/prewarm_tier2.py
+
 # scripts/seed_db.py lives at the repo root, not under backend/ — copied
 # separately so `make seed` (docker-compose exec backend python
 # /app/scripts/seed_db.py) works without shipping the whole scripts/ dir.

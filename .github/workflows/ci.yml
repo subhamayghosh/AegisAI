@@ -31,6 +31,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Cache Tier 2 model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: tier2-model-${{ runner.os }}-${{ hashFiles('backend/src/aegisai/tiers/tier2_semantic.py', 'backend/requirements.txt') }}
+
+      - name: Pre-warm Tier 2 model and local vector index
+        run: python scripts/prewarm_tier2.py
+
       - name: Install frontend dependencies
         working-directory: frontend
         run: npm ci

@@ -69,18 +69,21 @@ automatically — no separate list to maintain in `sanitizer.py`.
 
 ## Tier 2 semantic detector (`tiers/tier2_semantic.py`)
 
-`detect(text, source_type) -> TierSignal` embeds `text` with
-`sentence-transformers/all-MiniLM-L6-v2` (CPU) and compares it via cosine
-similarity against `CORPUS` — 54 hand-written attack paraphrases, 6 per
-`AttackType` across all 9 types (unlike Tier 1, which only covers the 6
-literally-regexable ones). Both the corpus and the query embedding are
-L2-normalized at encode time, so similarity is a plain dot product
-(`_top_match`) — no extra numerical-libraries dependency needed.
+`detect(text, source_type) -> TierSignal` embeds `text` with the local
+`sentence-transformers/all-MiniLM-L6-v2` encoder (CPU) and compares it via
+cosine similarity against `CORPUS` — 57 hand-written attack paraphrases
+across all 9 types (unlike Tier 1, which only covers the 6 literally-regexable
+ones). Both the corpus and query embeddings are L2-normalized. Linux/GHA/
+container installs search them through a FAISS `IndexFlatIP`; Windows/macOS
+or minimal installations use the equivalent NumPy dot-product fallback when a
+platform-specific `faiss-cpu` wheel is unavailable. FAISS is the vector index,
+not a replacement for the embedding encoder.
 
-- The model and corpus embeddings are computed **once at module import**,
-  not per call — importing this module downloads the model on first run
-  (cached under `~/.cache/huggingface` afterwards) and needs network access
-  once.
+- The model and corpus embeddings/index are computed **once at module import**,
+  not per call. The application loads with `local_files_only=True`; provision
+  the model first with `scripts/prewarm_tier2.py`, bake it into the Docker
+  image, or set `TIER2_MODEL_PATH` to a local model directory. Runtime
+  inspections do not depend on Hugging Face availability.
 - The threshold is read from `get_settings().tier2_threshold` on *every*
   call (not cached at import), so it's live-configurable — tests override
   it with `monkeypatch.setattr(get_settings(), "tier2_threshold", ...)`.
@@ -90,14 +93,12 @@ L2-normalized at encode time, so similarity is a plain dot product
 - Default threshold is 0.75 per `.env.example` / `config.py`. If you run
   the sweep script and it says otherwise, update both plus this note.
 
-**Known environment gap:** this repo's default sandbox runs behind a
-corporate proxy that blocks `huggingface.co` outright (403, not just a
-cert issue), so `tier2_semantic.py` cannot be imported or its tests run
-there — verified by injecting a fake `SentenceTransformer` to confirm the
-thresholding/best-match control flow independent of the real model. Run
-`tests/unit/tiers/test_tier2.py` and `scripts/tune_tier2_thresholds.py` from
-a machine with real network access (or a pre-warmed HF cache) before
-trusting their output.
+**Provisioning note:** a fresh machine or ephemeral CI runner still needs the
+model files once. GitHub Actions caches `~/.cache/huggingface` and runs the
+prewarm script before the live corpus stage; Docker prewarms during image
+build. If the model is absent at runtime, the pipeline reports
+`tier2_unavailable` and continues with Tier 1/Tier 3 rather than blocking the
+request thread or retrying network downloads.
 
 ## Tier 3 LLM judge (`tiers/tier3_llm_judge.py`, `llm/`)
 
