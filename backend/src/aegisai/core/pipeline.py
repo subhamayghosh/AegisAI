@@ -62,7 +62,9 @@ class _Tier2Loader:
 
     def __init__(self) -> None:
         self._lock = threading.Lock()
+        self._finished = threading.Event()
         self._started = False
+        self._state = "not_started"
         self.detect: _Tier2Detect | None = None
 
     def start(self) -> None:
@@ -70,16 +72,36 @@ class _Tier2Loader:
             if self._started:
                 return
             self._started = True
+            self._state = "loading"
         threading.Thread(target=self._load, name="tier2-loader", daemon=True).start()
 
     def _load(self) -> None:
         try:
             from aegisai.tiers import tier2_semantic
         except Exception as exc:  # model download / load failure; Tiers 1 + 3 still run
+            with self._lock:
+                self._state = "failed"
             logger.error("tier2_load_failed", error_type=type(exc).__name__)
+            self._finished.set()
             return
-        self.detect = tier2_semantic.detect
+        with self._lock:
+            self.detect = tier2_semantic.detect
+            self._state = "ready"
         logger.info("tier2_ready")
+        self._finished.set()
+
+    def wait_until_ready(self, timeout_s: float) -> str:
+        """Wait for the background import without blocking the event loop."""
+        if self.state == "failed":
+            return "failed"
+        self.start()
+        self._finished.wait(timeout=max(0.0, timeout_s))
+        return self.state
+
+    @property
+    def state(self) -> str:
+        with self._lock:
+            return self._state
 
 
 _tier2 = _Tier2Loader()
@@ -88,6 +110,18 @@ _tier2 = _Tier2Loader()
 def warm_up() -> None:
     """Start loading Tier 2 in the background. Call once at app startup."""
     _tier2.start()
+
+
+async def wait_for_tier2(timeout_s: float | None = None) -> str:
+    """Wait for startup preloading without blocking the event loop."""
+    if _tier2.detect is not None:
+        return "ready"
+    timeout = (
+        get_settings().tier2_startup_timeout_s
+        if timeout_s is None
+        else timeout_s
+    )
+    return await asyncio.to_thread(_tier2.wait_until_ready, max(0.1, timeout))
 
 
 def _tier2_unavailable(notes: str) -> TierSignal:
@@ -102,8 +136,23 @@ def _tier2_unavailable(notes: str) -> TierSignal:
 async def _run_tier2(text: str, source_type: SourceType) -> TierSignal:
     detect = _tier2.detect
     if detect is None:
-        _tier2.start()
-        return _tier2_unavailable("semantic model not loaded yet")
+        if _tier2.state == "failed":
+            return _tier2_unavailable(
+                "semantic model unavailable; run scripts/prewarm_tier2.py "
+                "or set TIER2_MODEL_PATH"
+            )
+        await asyncio.to_thread(
+            _tier2.wait_until_ready,
+            max(0.1, get_settings().tier2_load_timeout_s),
+        )
+        detect = _tier2.detect
+        if detect is None:
+            if _tier2.state == "failed":
+                return _tier2_unavailable(
+                    "semantic model unavailable; run scripts/prewarm_tier2.py "
+                    "or set TIER2_MODEL_PATH"
+                )
+            return _tier2_unavailable("semantic model is still loading")
     try:
         return await detect(text, source_type)
     except Exception as exc:

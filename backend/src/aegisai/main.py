@@ -21,9 +21,11 @@ configure_logging(_settings.log_level)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    # Load the Tier 2 model in the background at startup so the first
-    # inspections don't pay for it.
+    # Start and await Tier 2 before serving requests. MiniLM loading and the
+    # 147-vector index can take over two minutes on a cold Windows process;
+    # serving first would make a legitimate first inspection look unavailable.
     pipeline.warm_up()
+    await pipeline.wait_for_tier2()
     yield
 
 

@@ -90,5 +90,5 @@ async def test_top_similarity_ignores_threshold() -> None:
 
 
 def test_tier2_uses_a_local_index_backend() -> None:
-    assert len(tier2_semantic.CORPUS) == 57
+    assert len(tier2_semantic.CORPUS) == 147
     assert tier2_semantic.INDEX_BACKEND in {"faiss", "numpy"}
