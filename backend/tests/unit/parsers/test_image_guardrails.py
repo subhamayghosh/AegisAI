@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 from io import BytesIO
 from types import SimpleNamespace
 
@@ -52,3 +53,32 @@ def test_image_parser_downscales_before_ocr(monkeypatch) -> None:
     assert parsed.metadata["width"] == 1200
     assert parsed.metadata["height"] == 600
     assert calls == [(256, 128)]
+
+
+def test_vision_payload_is_resized_and_records_engine(monkeypatch) -> None:
+    monkeypatch.setattr(
+        image,
+        "get_settings",
+        lambda: SimpleNamespace(
+            ocr_timeout_s=1.0,
+            ocr_max_dimension=4096,
+            ocr_vision_max_dimension=512,
+        ),
+    )
+
+    encoded, media_type, metadata = image.prepare_for_vision(
+        _png_bytes((1600, 800)), {"filename": "synthetic.png"}
+    )
+
+    with Image.open(BytesIO(base64.b64decode(encoded))) as prepared:
+        assert prepared.size == (512, 256)
+        assert prepared.mode == "RGB"
+    assert media_type == "image/jpeg"
+    assert metadata == {
+        "filename": "synthetic.png",
+        "width": 1600,
+        "height": 800,
+        "ocr_width": 512,
+        "ocr_height": 256,
+        "ocr_engine": "claude_vision",
+    }

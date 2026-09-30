@@ -104,13 +104,13 @@ python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
 # The image parser (backend/src/aegisai/parsers/image.py) shells out to
-# the tesseract OCR binary via pytesseract — install it separately:
+# the tesseract OCR binary via pytesseract when it is available:
 #   Debian/Ubuntu: apt-get install tesseract-ocr
 #   macOS:         brew install tesseract
 #   Windows:       https://github.com/UB-Mannheim/tesseract/wiki
-# Without it, image-source-type inspections raise TesseractNotFoundError and
-# the corresponding unit test (test_image_parser_ocr_extracts_injection_text)
-# is skipped rather than failed.
+# Without it, AegisAI uses the configured Claude working model as a bounded
+# Vision OCR fallback when OCR_VISION_FALLBACK=true. Images are resized before
+# either engine runs, and both paths have explicit time limits.
 
 # The Tier 2 semantic detector (backend/src/aegisai/tiers/tier2_semantic.py)
 # downloads sentence-transformers/all-MiniLM-L6-v2 (~90MB) from Hugging Face
@@ -150,6 +150,8 @@ is hard-coded. Full reference: [§17 of the playbook](./AEGISAI_PLAYBOOK.md#17-e
 | `ACCESS_TOKEN_TTL_MIN` / `REFRESH_TOKEN_TTL_DAYS` | Token lifetimes |
 | `ANTHROPIC_API_KEY` | Required for Tier 3 (LLM judge); Tiers 1+2 work without it |
 | `CLAUDE_WORKING_MODEL` / `CLAUDE_JUDGE_MODEL` | App-default model IDs — overridable per-user from Settings |
+| `OCR_TIMEOUT_S` / `OCR_MAX_DIMENSION` | Local Tesseract process and image-size limits |
+| `OCR_VISION_FALLBACK` / `OCR_VISION_TIMEOUT_S` / `OCR_VISION_MAX_DIMENSION` | Bounded Claude Vision fallback when Tesseract is unavailable |
 | `TIER2_THRESHOLD` / `SESSION_JAILBREAK_THRESHOLD` | Detection thresholds |
 | `RATE_LIMIT_LOGIN_PER_MIN` / `RATE_LIMIT_INSPECT_PER_MIN` | Per-IP / per-user rate limits |
 | `CORS_ALLOWED_ORIGINS` | No wildcard, ever — see [security rules](./.claude/rules/security-rules.md) |

@@ -7,7 +7,7 @@ import uuid
 from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import inspect as sa_inspect
 
-from aegisai.config import resolve_model_ids
+from aegisai.config import get_settings, resolve_model_ids
 from aegisai.db.models import User, UserSettings
 from aegisai.llm.client import get_judge_client
 from aegisai.logging_ import get_logger
@@ -15,7 +15,10 @@ from aegisai.schemas import AttackType, SourceType, TierName, TierSignal
 
 logger = get_logger(__name__)
 
-JUDGE_TIMEOUT_S = 5.0
+# Keep the tier's outer deadline aligned with the configured SDK timeout. Long
+# retrieved documents can legitimately take more than five seconds, while the
+# request still remains bounded by CLAUDE_TIMEOUT_S.
+JUDGE_TIMEOUT_S = float(get_settings().claude_timeout_s)
 UNAVAILABLE_RULE = "tier3_unavailable"
 # Judge reasoning lands in inspections.tier_signals; keep it short so it can't
 # become a back door for storing the raw input the user didn't opt in to keep.

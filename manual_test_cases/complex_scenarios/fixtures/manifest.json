@@ -1,0 +1,62 @@
+{
+  "generated_by": "scripts/generate_complex_demo_fixtures.py",
+  "privacy": "Synthetic only; no real identities, credentials, or production endpoints.",
+  "expected": "Each case should reach the configured Anthropic judge unless a higher-confidence local tier blocks it first. Final decision must never be ALLOW.",
+  "cases": [
+    {
+      "id": "C01",
+      "source_type": "user_message",
+      "file": "01-user-message-authority-maze.txt"
+    },
+    {
+      "id": "C02",
+      "source_type": "pdf",
+      "file": "02-board-pack-white-text-annex.pdf"
+    },
+    {
+      "id": "C03",
+      "source_type": "email",
+      "file": "03-finance-thread-hidden-alternative.eml"
+    },
+    {
+      "id": "C04",
+      "source_type": "html",
+      "file": "04-support-portal-hidden-dom.html"
+    },
+    {
+      "id": "C05",
+      "source_type": "markdown",
+      "file": "05-release-runbook-encoded.md"
+    },
+    {
+      "id": "C06",
+      "source_type": "word_doc",
+      "file": "06-policy-review-hidden-table.docx"
+    },
+    {
+      "id": "C07",
+      "source_type": "api_response",
+      "file": "07-vendor-api-deeply-nested.json"
+    },
+    {
+      "id": "C08",
+      "source_type": "ocr_text",
+      "file": "08-noisy-ocr-transcript.txt"
+    },
+    {
+      "id": "C09",
+      "source_type": "source_code",
+      "file": "09-ci-review-exfil.py"
+    },
+    {
+      "id": "C10",
+      "source_type": "web_page",
+      "file": "10-research-page-false-policy.html"
+    },
+    {
+      "id": "C11",
+      "source_type": "image",
+      "file": "11-conference-poster-low-contrast.png"
+    }
+  ]
+}

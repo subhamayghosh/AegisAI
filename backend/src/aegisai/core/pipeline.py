@@ -12,11 +12,12 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aegisai import parsers
-from aegisai.config import resolve_model_ids
+from aegisai.config import get_settings, resolve_model_ids
 from aegisai.core import observability, policy_engine, sanitizer, session_tracker
 from aegisai.db.models import Inspection, User
+from aegisai.llm.image_ocr import get_ocr_client
 from aegisai.logging_ import get_logger
-from aegisai.parsers.image import OCRTimeoutError
+from aegisai.parsers.image import OCRTimeoutError, prepare_for_vision
 from aegisai.schemas import (
     AttackType,
     Decision,
@@ -122,13 +123,46 @@ async def _run_tier1(text: str, source_type: SourceType) -> list[TierSignal]:
     return [regex_signal, encoded_signal] if encoded_signal.flagged else [regex_signal]
 
 
-async def _parse(request: FirewallRequest) -> ParsedInput:
+async def _parse_image_with_vision(
+    request: FirewallRequest, working_model_id: str
+) -> ParsedInput:
+    settings = get_settings()
+    if not settings.ocr_vision_fallback or not settings.anthropic_api_key:
+        raise ParserUnavailableError(request.source_type.value)
+
+    try:
+        image_base64, media_type, metadata = await asyncio.to_thread(
+            prepare_for_vision,
+            request.text,
+            request.metadata.model_dump(exclude_none=True),
+        )
+        text = await asyncio.wait_for(
+            get_ocr_client().transcribe(image_base64, media_type, working_model_id),
+            timeout=max(1.0, settings.ocr_vision_timeout_s),
+        )
+    except TimeoutError as exc:
+        raise ParserTimeoutError(request.source_type.value) from exc
+    except ParserTimeoutError:
+        raise
+    except Exception as exc:
+        logger.error("vision_ocr_fallback_failed", error_type=type(exc).__name__)
+        raise ParserUnavailableError(request.source_type.value) from exc
+
+    if not text:
+        raise ParserUnavailableError(request.source_type.value)
+    return ParsedInput(text=text, source_type=request.source_type, metadata=metadata)
+
+
+async def _parse(request: FirewallRequest, working_model_id: str) -> ParsedInput:
     metadata = request.metadata.model_dump(exclude_none=True)
     try:
         # Parsers are sync and some are slow (OCR, large PDFs) — keep them off
         # the event loop.
         return await asyncio.to_thread(parsers.parse, request.text, request.source_type, metadata)
     except pytesseract.TesseractNotFoundError as exc:
+        if request.source_type == SourceType.image:
+            logger.info("tesseract_unavailable_using_vision_ocr")
+            return await _parse_image_with_vision(request, working_model_id)
         raise ParserUnavailableError(request.source_type.value) from exc
     except OCRTimeoutError as exc:
         raise ParserTimeoutError(request.source_type.value) from exc
@@ -195,7 +229,7 @@ async def run_pipeline(request: FirewallRequest, user: User, db: AsyncSession) -
     working_model_id, judge_model_id = resolve_model_ids(user_settings)
     store_raw_text = bool(user_settings and user_settings.store_raw_text_in_history)
 
-    parsed = await _parse(request)
+    parsed = await _parse(request, working_model_id)
     text = parsed.text
 
     # session_id is client-supplied, so scope it to the user — otherwise one

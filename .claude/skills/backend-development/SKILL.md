@@ -120,4 +120,4 @@ test already cached (`cache_logger_on_first_use=True`), making it order-dependen
 
 ## Bounded image OCR
 
-The image parser uses `ImageOps.exif_transpose`, converts to RGB, downsizes any image larger than `OCR_MAX_DIMENSION`, and passes `OCR_TIMEOUT_S` to Tesseract. A timeout is surfaced as HTTP 408 with an actionable message; missing Tesseract remains HTTP 503. Keep OCR work inside `asyncio.to_thread` so the event loop cannot be blocked by image parsing.
+The image parser uses `ImageOps.exif_transpose`, composites transparency onto white, converts to RGB, downsizes any image larger than `OCR_MAX_DIMENSION`, and passes `OCR_TIMEOUT_S` to Tesseract. A timeout is surfaced as HTTP 408 with an actionable message. If the Tesseract executable is missing and `OCR_VISION_FALLBACK=true`, the pipeline prepares a JPEG capped by `OCR_VISION_MAX_DIMENSION` and calls the configured Anthropic working model through `llm/image_ocr.py`, bounded by `OCR_VISION_TIMEOUT_S`. The OCR prompt treats every image instruction as untrusted text to transcribe; it never logs image bytes or extracted text. Keep local OCR work inside `asyncio.to_thread` so the event loop cannot be blocked.

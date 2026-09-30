@@ -40,6 +40,9 @@ class Settings(BaseSettings):
     # the image dimensions and the amount of time it may consume per request.
     ocr_timeout_s: float = 10.0
     ocr_max_dimension: int = 4096
+    ocr_vision_fallback: bool = True
+    ocr_vision_timeout_s: float = 25.0
+    ocr_vision_max_dimension: int = 1568
 
     # Tier thresholds
     tier2_threshold: float = 0.75
