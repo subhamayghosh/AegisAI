@@ -1426,7 +1426,7 @@ precision, recall, F1 per threshold.
 Read .claude/skills/security-detection/SKILL.md and §7 of the playbook.
 
 Implement backend/src/aegisai/llm/client.py:
-- AsyncAnthropicClient wrapper with retry (max 2), 5s timeout,
+- AsyncAnthropicClient wrapper with bounded retry and a configurable timeout,
   reads api key + model IDs from resolved user settings (fall back
   to env). Exposes `async classify(text, source_type, session_context,
   model_id) -> dict`.
@@ -1443,7 +1443,7 @@ Implement backend/src/aegisai/tiers/tier3_llm_judge.py:
 - async detect(text, source_type, session_context=None, user=None)
   -> TierSignal.
 - Resolve judge_model_id from user.settings first, then env default.
-- Call client.classify with a 5s timeout. On timeout or malformed
+- Call client.classify with the `CLAUDE_TIMEOUT_S` deadline. On timeout or malformed
   JSON, return an unflagged signal with tier=tier3, matched_rule=
   "tier3_unavailable"; the pipeline logs this but does not block.
 

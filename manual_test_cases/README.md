@@ -53,11 +53,17 @@ that run as a detection failure.
 | S08 | OCR text | [`ocr-text-role-change.txt`](./fixtures/ocr-text-role-change.txt) | `BLOCK` with Tier 2/3 ready | Text produced by a caller's OCR pipeline is protected too. |
 | S09 | Source code | [`source-code-exfil.py`](./fixtures/source-code-exfil.py) | `BLOCK` | Comments and string literals are inspected for prompt-driven exfiltration. |
 | S10 | Web page | [`web-page-context-poisoning.html`](./fixtures/web-page-context-poisoning.html) | `BLOCK` with Tier 2/3 ready | Scraped-page content cannot claim false authority over an agent. |
-| S11 | Image | [`image-ocr-override.png`](./fixtures/image-ocr-override.png) | `BLOCK` when Tesseract is installed | OCR extracts the embedded instruction before detection. |
+| S11 | Image | [`image-ocr-override.png`](./fixtures/image-ocr-override.png) | `BLOCK` | Bounded Tesseract OCR runs locally when available; otherwise the configured Claude working model provides a bounded Vision OCR fallback. |
 
 `pdf-hidden-override.pdf`, `word-hidden-override.docx`, and
-`image-ocr-override.png` are upload fixtures. If the Image row returns 503,
-install the host's `tesseract-ocr` package and restart the backend.
+`image-ocr-override.png` are upload fixtures. Image inspection first uses local
+Tesseract. When the executable is unavailable and `OCR_VISION_FALLBACK=true`,
+AegisAI resizes the image and transcribes it with the configured Anthropic
+working model before running the normal detection pipeline.
+
+For substantially larger stage-ready files across all 11 sources, including
+hidden DOM/PDF/DOCX content and zero-width/confusable characters, use the
+[`complex live-demo pack`](./complex_scenarios/README.md).
 
 ## Attack-type coverage (all 9 attack families)
 

@@ -36,6 +36,14 @@ class Settings(BaseSettings):
     claude_timeout_s: int = 12
     claude_max_retries: int = 0
 
+    # Image OCR guardrails. Tesseract is an external process, so bound both
+    # the image dimensions and the amount of time it may consume per request.
+    ocr_timeout_s: float = 10.0
+    ocr_max_dimension: int = 4096
+    ocr_vision_fallback: bool = True
+    ocr_vision_timeout_s: float = 25.0
+    ocr_vision_max_dimension: int = 1568
+
     # Tier thresholds
     tier2_threshold: float = 0.75
     session_jailbreak_threshold: float = 0.70

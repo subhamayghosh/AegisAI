@@ -2,6 +2,9 @@
 manual_test_cases/fixtures/*.pdf binary
 manual_test_cases/fixtures/*.docx binary
 manual_test_cases/fixtures/*.png binary
+manual_test_cases/complex_scenarios/fixtures/*.pdf binary
+manual_test_cases/complex_scenarios/fixtures/*.docx binary
+manual_test_cases/complex_scenarios/fixtures/*.png binary
 docs/assets/*.gif binary
 frontend/public/images/*.png binary
 docs/*.pptx binary

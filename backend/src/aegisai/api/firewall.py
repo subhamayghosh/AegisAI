@@ -4,7 +4,12 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from aegisai.config import get_settings
-from aegisai.core.pipeline import InputParseError, ParserUnavailableError, run_pipeline
+from aegisai.core.pipeline import (
+    InputParseError,
+    ParserTimeoutError,
+    ParserUnavailableError,
+    run_pipeline,
+)
 from aegisai.db.models import User
 from aegisai.db.session import get_db
 from aegisai.schemas import FirewallRequest, FirewallResponse
@@ -37,4 +42,9 @@ async def inspect(
         raise HTTPException(
             status.HTTP_503_SERVICE_UNAVAILABLE,
             f"The '{body.source_type.value}' parser is unavailable on this server",
+        ) from None
+    except ParserTimeoutError:
+        raise HTTPException(
+            status.HTTP_408_REQUEST_TIMEOUT,
+            "Image OCR exceeded its safety time limit. Try a smaller or clearer image.",
         ) from None

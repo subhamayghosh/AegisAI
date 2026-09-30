@@ -101,8 +101,8 @@ with an explicitly opted-in, pre-warmed cache before trusting their output.
 
 `detect(text, source_type, session_context=None, user=None) -> TierSignal`
 resolves the judge model via `config.resolve_model_ids(user.settings)` and
-calls `llm.client.get_judge_client().classify(...)` inside a 5s
-`asyncio.wait_for`. It never raises — every failure path returns an
+calls `llm.client.get_judge_client().classify(...)` inside an
+`asyncio.wait_for` bounded by `CLAUDE_TIMEOUT_S` (12 seconds by default). It never raises — every failure path returns an
 unflagged signal with `matched_rule="tier3_unavailable"` and a short `notes`
 reason (`judge timed out` / `judge unavailable` / `judge returned an invalid
 verdict`).
@@ -110,7 +110,7 @@ verdict`).
 - **Request shape** (`llm/client.py`): `system=JUDGE_SYSTEM_PROMPT`, one user
   message from `build_judge_user_prompt()`, `max_tokens=256`,
   `output_config={"effort": "low", "format": {"type": "json_schema", "schema": JUDGE_OUTPUT_SCHEMA}}`.
-  Low effort is what keeps the judge inside 5s; the schema makes the reply
+  Low effort helps keep the judge inside its configured timeout; the schema makes the reply
   parseable. Do not add `temperature`/`top_p` — 400 on every judge model.
 - **Client** wraps `anthropic.AsyncAnthropic` (timeout / retries from
   `CLAUDE_TIMEOUT_S` / `CLAUDE_MAX_RETRIES`, default 12s / 0). The API key
@@ -217,3 +217,7 @@ on `regex:`/`encoded:` matches and wraps retrieved source types. When a
 Tier 2 or Tier 3 signal alone, `sanitized_text` equals the input. Decide
 whether those cases should be wrapped too (or escalated) before relying on
 NEUTRALIZE for non-retrieved sources.
+
+## OCR safety guardrails
+
+Image demos must exercise the same detection pipeline as pasted text, but OCR is an external process and must be bounded. `parsers/image.py` caps dimensions and passes a timeout to Tesseract; it raises `OCRTimeoutError` so the API returns a clear 408 instead of hanging. A missing executable may fall back to `llm/image_ocr.py`: the configured Claude working model receives a resized image under a transcription-only system prompt that explicitly treats image instructions as untrusted data. Empty, refused, failed, or over-time Vision results remain unavailable rather than being treated as benign. Do not remove either timeout or run local image parsing on the event loop.

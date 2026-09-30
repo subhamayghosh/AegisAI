@@ -74,7 +74,7 @@ class AsyncAnthropicClient:
                         "content": build_judge_user_prompt(text, source_type, session_context),
                     }
                 ],
-                # Low effort keeps the judge inside its 5s budget; the schema
+                # Low effort keeps the judge inside its configured budget; the schema
                 # makes the reply parseable without prose or code fences.
                 output_config={
                     "effort": "low",
