@@ -22,6 +22,10 @@ Colors are CSS variables (`--color-*`, `R G B` triples) defined in `src/index.cs
 
 `src/contexts/ToastContext.jsx` (added in Step 11, not in the original §5 file tree — needed for the Login/Register "error toasts" requirement) exposes `useToast()` -> `{ success(msg), error(msg), dismiss(id) }`. Toasts auto-dismiss after 5s and render in a fixed bottom-right `aria-live` region. Reuse this instead of inventing local toast state per page.
 
+Pushing a message that is already on screen (same text and variant) does **not** stack a second copy — the provider restarts the existing toast's dismiss timer and returns its id. Repeated clicks on a failing action therefore show one toast, not one per click. Don't add per-page click guards to work around duplicate toasts.
+
+Auth error branches are exhaustive on purpose: map every status the endpoint can return (`409`/`400`, `422`, `429`, plus `!error.response` for an unreachable backend) before the generic fallback. A missing branch is how a rate-limited retry ends up reporting "Registration failed" for an input the user was already told was a duplicate. `Register.jsx` additionally remembers addresses the API rejected with `409` and re-reports them from memory instead of re-posting, so the duplicate-email wording stays identical across retries and never burns the `3/minute` register limit.
+
 ## Chart library
 
 Step 13 added `recharts` (not previously in package.json) for `SessionDetail.jsx`'s suspicion-score line chart (`LineChart`/`Line`/`ReferenceLine` for the 0.70 threshold). Style its SVG strokes with the same `rgb(var(--color-x))` tokens used everywhere else (e.g. `stroke="rgb(var(--color-primary))"`) so the chart stays in sync with light/dark theming — recharts doesn't pick up Tailwind classes on its internal SVG nodes, so this has to be inline.

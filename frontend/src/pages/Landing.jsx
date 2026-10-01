@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, FileSearch, Filter, ShieldCheck, Sparkles } from "lucide-react";
+import { FileSearch, Filter, ShieldCheck, Sparkles } from "lucide-react";
+import { ATTACK_TYPES, SOURCE_TYPES } from "../constants";
 
 const STEPS = [
   {
@@ -17,6 +18,15 @@ const STEPS = [
     title: "Tier 3 — LLM Judge",
     body: "A Claude judge model reasons over ambiguous, multi-turn, or context-dependent injection attempts.",
   },
+];
+
+// Counted from the shared enum lists and the tier cards above rather than
+// written as literals, so these headline figures cannot drift out of sync when
+// a source type, attack type, or tier is added.
+const STATS = [
+  { value: SOURCE_TYPES.length, label: "input source types protected" },
+  { value: ATTACK_TYPES.length, label: "prompt-injection attack types" },
+  { value: STEPS.length, label: "defense tiers, one clear decision" },
 ];
 
 export default function Landing() {
@@ -42,13 +52,13 @@ export default function Landing() {
               to="/login"
               className="rounded-xl border border-white/15 px-4 py-2 text-sm font-medium text-slate-100 transition hover:border-white/30 hover:bg-white/10"
             >
-              Login
+              Sign in
             </Link>
             <Link
               to="/register"
               className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-indigo-950/30 transition hover:-translate-y-0.5 hover:bg-cyan-50"
             >
-              Start free
+              Sign up
             </Link>
           </div>
         </header>
@@ -65,35 +75,15 @@ export default function Landing() {
             <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-300 sm:text-xl">
               AegisAI inspects every message, document, and tool response through a three-tier defense pipeline — then makes the reason visible.
             </p>
-            <div className="mt-9 flex flex-wrap gap-3">
-              <Link
-                to="/register"
-                className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950/50 transition hover:-translate-y-0.5 hover:bg-primaryHover"
-              >
-                Protect an agent <ArrowRight size={17} aria-hidden="true" />
-              </Link>
-              <Link
-                to="/login"
-                className="rounded-xl border border-white/15 bg-white/5 px-5 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
-              >
-                Open dashboard
-              </Link>
-            </div>
           </div>
 
           <div className="mt-16 grid max-w-5xl gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-5 backdrop-blur-sm">
-              <p className="text-2xl font-semibold text-white">11</p>
-              <p className="mt-1 text-sm text-slate-300">input source types protected</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-5 backdrop-blur-sm">
-              <p className="text-2xl font-semibold text-white">9</p>
-              <p className="mt-1 text-sm text-slate-300">prompt-injection attack types</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-5 backdrop-blur-sm">
-              <p className="text-2xl font-semibold text-white">3</p>
-              <p className="mt-1 text-sm text-slate-300">defense tiers, one clear decision</p>
-            </div>
+            {STATS.map(({ value, label }) => (
+              <div key={label} className="rounded-2xl border border-white/10 bg-slate-950/35 p-5 backdrop-blur-sm">
+                <p className="text-2xl font-semibold text-white">{value}</p>
+                <p className="mt-1 text-sm text-slate-300">{label}</p>
+              </div>
+            ))}
           </div>
         </section>
       </div>

@@ -7,6 +7,9 @@ let idCounter = 0;
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const timers = useRef(new Map());
+  // `${variant}|${message}` -> id for the toasts currently on screen, so a
+  // repeated action re-shows one toast instead of stacking identical copies.
+  const visible = useRef(new Map());
 
   const dismiss = useCallback((id) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -15,11 +18,27 @@ export function ToastProvider({ children }) {
       clearTimeout(timer);
       timers.current.delete(id);
     }
+    for (const [key, visibleId] of visible.current) {
+      if (visibleId === id) {
+        visible.current.delete(key);
+        break;
+      }
+    }
   }, []);
 
   const push = useCallback(
     (message, variant = "success") => {
+      const key = `${variant}|${message}`;
+      const existingId = visible.current.get(key);
+      if (existingId !== undefined) {
+        // Already showing this exact message: restart its dismiss timer so it
+        // stays readable for the full window after the latest trigger.
+        clearTimeout(timers.current.get(existingId));
+        timers.current.set(existingId, setTimeout(() => dismiss(existingId), 5000));
+        return existingId;
+      }
       const id = ++idCounter;
+      visible.current.set(key, id);
       setToasts((prev) => [...prev, { id, message, variant }]);
       const timer = setTimeout(() => dismiss(id), 5000);
       timers.current.set(id, timer);
