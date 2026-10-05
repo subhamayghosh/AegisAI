@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { ShieldQuestion } from "lucide-react";
 import { useToast } from "../hooks/useToast";
 import useInspectionRunner from "../hooks/useInspectionRunner";
 import FriendlyResult from "../components/FriendlyResult";
+import ResultOverlay from "../components/ResultOverlay";
 import DemoTourPanel from "../components/DemoTourPanel";
 
 import ThreeDSpinner from "../components/ThreeDSpinner";
@@ -78,9 +79,27 @@ export default function Inspect() {
   const [demoStatus, setDemoStatus] = useState("idle");
   const [demoStep, setDemoStep] = useState(-1);
   const [demoResults, setDemoResults] = useState([]);
+  const [resultOverlayOpen, setResultOverlayOpen] = useState(false);
+  const resultPanelRef = useRef(null);
   const demoStopRequested = useRef(false);
   const demoRunning = useRef(false);
   const demoAutoStarted = useRef(false);
+
+  const clearInspectionResult = () => {
+    clearResult();
+    setResultOverlayOpen(false);
+  };
+
+  const closeResultOverlay = useCallback(() => {
+    setResultOverlayOpen(false);
+    window.requestAnimationFrame(() => {
+      const resultPanel = resultPanelRef.current;
+      if (typeof resultPanel?.scrollIntoView === "function") {
+        resultPanel.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      resultPanel?.focus({ preventScroll: true });
+    });
+  }, []);
 
   const isBinary = BINARY_SOURCE_TYPES.has(sourceType);
   const selectedScenario = getDemoScenario(scenarioId);
@@ -92,7 +111,7 @@ export default function Inspect() {
     setFile(null);
     setText("");
     setScenarioId("");
-    clearResult();
+    clearInspectionResult();
   };
 
   const handleScenarioChange = (e) => {
@@ -104,7 +123,7 @@ export default function Inspect() {
     setInputMode(scenario.mode);
     setFile(null);
     setText(scenario.content);
-    clearResult();
+    clearInspectionResult();
   };
 
   const loadThreeTierProbe = () => {
@@ -115,7 +134,7 @@ export default function Inspect() {
     setText(THREE_TIER_PROBE);
     setSessionId("");
     setTurnId(1);
-    clearResult();
+    clearInspectionResult();
   };
 
   const runDemoTour = async () => {
@@ -179,6 +198,10 @@ export default function Inspect() {
     }, 450);
     return () => window.clearTimeout(timer);
   }, [demoMode, autoStartDemo]);
+
+  useEffect(() => {
+    if (result && !submitting && !demoMode) setResultOverlayOpen(true);
+  }, [demoMode, result, submitting]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -319,21 +342,30 @@ export default function Inspect() {
 
       <div className="space-y-4">
         <InspectionConsole active={submitting} step={progressStep} entries={consoleEntries} quote={quote} />
-        <div className="rounded-card border border-border bg-surface p-5">
+        <div ref={resultPanelRef} tabIndex={-1} className="rounded-card border border-border bg-surface p-5 outline-none">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="text-lg font-semibold">{demoMode ? "Current verdict" : "Your result"}</h2>
-            {demoMode && demoStep >= 0 && <span className="text-xs text-textMuted">Scenario {demoStep + 1} of {DEMO_ATTACKS.length}</span>}
+            <div className="flex items-center gap-3">
+              {result && !demoMode && !resultOverlayOpen && <button type="button" onClick={() => setResultOverlayOpen(true)} className="rounded-lg border border-primary/30 px-2.5 py-1.5 text-xs font-semibold text-primary transition hover:bg-primary/10">Open full result</button>}
+              {demoMode && demoStep >= 0 && <span className="text-xs text-textMuted">Scenario {demoStep + 1} of {DEMO_ATTACKS.length}</span>}
+            </div>
           </div>
           {submitting ? (
             <div className="flex flex-col items-center justify-center gap-4 py-10 text-center text-textMuted"><ThreeDSpinner label="Inspecting your content safely" /><div><p className="text-sm font-medium text-text">Checking your content safely</p><p className="mt-1 text-xs">Reading the source, checking its meaning, and preparing a clear explanation.</p></div></div>
           ) : !result ? (
             <div className="flex flex-col items-center justify-center gap-2 py-10 text-center text-textMuted"><ShieldQuestion size={32} aria-hidden="true" /><p className="text-sm">Run an inspection to see a clear verdict and explanation.</p></div>
+          ) : resultOverlayOpen ? (
+            <div className="rounded-2xl border border-primary/20 bg-primary/5 px-4 py-8 text-center">
+              <p className="text-sm font-semibold">Your full result is open above.</p>
+              <p className="mt-1 text-xs text-textMuted">Close the overlay to continue reading it here.</p>
+            </div>
           ) : (
             <FriendlyResult result={result} sourceType={sourceType} />
           )}
         </div>
       </div>
     </div>
+      {resultOverlayOpen && result && <ResultOverlay result={result} sourceType={sourceType} onClose={closeResultOverlay} />}
     </div>
   );
 }
