@@ -60,3 +60,4 @@
 2026-10-05 19:20  Codex  Added an accessible auto-opening inspection-result overlay with Escape/close controls, focus return, scroll restoration, and inline-result fallback after dismissal.
 2026-10-05 19:35  Codex  Portaled the inspection-result overlay to document.body so its backdrop covers the full application viewport above the navigation and page content.
 2026-10-05 19:40  Codex  Added a plain-language confidence percentage beside the AegisAI verdict, derived from the strongest relevant safety check.
+2026-10-05 20:30  Codex  Closed live corpus misses with narrow Tier 1 rules and regression cases, and moved request-path session suspicion loading to persisted inspections for multi-worker consistency.

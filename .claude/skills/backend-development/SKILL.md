@@ -134,3 +134,8 @@ demonstration gateway rather than a production agent integration.
 `GET /metrics` is a Prometheus-compatible, privacy-safe counter endpoint. It
 may expose totals and enum labels, but must never include input hashes, raw
 content, emails, IPs, or model secrets.
+
+Session suspicion scores on the request path are loaded from the latest
+user-scoped `inspections` row before policy evaluation. This keeps multi-turn
+escalation consistent when the API runs with more than one worker; the
+process-local tracker helpers remain only for unit/reset tests.

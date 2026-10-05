@@ -107,6 +107,18 @@ _RULES: tuple[_Rule, ...] = (
         ),
         0.9,
     ),
+    _Rule(
+        "regex:indirect_secret_guidance",
+        AttackType.secret_extraction,
+        re.compile(
+            r"\b(?:paraphrase|summari[sz]e|describe|restate|outline)\b"
+            r"[^.]{0,120}\b(?:internal\s+guidance|hidden\s+guidance|"
+            r"rules?\s+of\s+the\s+road|guidance\s+(?:given|provided)\s+"
+            r"before\s+(?:this|our)\s+conversation)\b",
+            re.IGNORECASE,
+        ),
+        0.92,
+    ),
     # -- tool_abuse -------------------------------------------------------------
     _Rule(
         "regex:tool_abuse_shell_command",
@@ -171,6 +183,30 @@ _RULES: tuple[_Rule, ...] = (
         AttackType.encoded_instructions,
         re.compile(r"\b(?:base64|rot13)\s*-?\s*encoded\s+instructions?\b", re.IGNORECASE),
         0.8,
+    ),
+    _Rule(
+        "regex:encoded_puzzle_comply",
+        AttackType.encoded_instructions,
+        re.compile(
+            r"\b(?:solve|work\s+out|decode|translate)\b[^.]{0,140}"
+            r"\b(?:cipher|riddle|puzzle|encoded)\b[^.]{0,100}"
+            r"\b(?:follow|obey|go\s+along|comply|do\s+whatever|carry\s+out)\b",
+            re.IGNORECASE,
+        ),
+        0.92,
+    ),
+    # -- multi_step_jailbreak -------------------------------------------------
+    _Rule(
+        "regex:trust_escalation_to_harm",
+        AttackType.multi_step_jailbreak,
+        re.compile(
+            r"\b(?:fully\s+in\s+character|we(?:'ve|\s+have)\s+built\s+that\s+trust|"
+            r"you\s+(?:said|agreed)\s+.{0,40}\s+trust)\b[^.]{0,180}"
+            r"\b(?:real|working)\b[^.]{0,100}"
+            r"\b(?:chemical|dangerous\s+gas|explosive|poison|weapon)\b",
+            re.IGNORECASE,
+        ),
+        0.95,
     ),
 )
 
