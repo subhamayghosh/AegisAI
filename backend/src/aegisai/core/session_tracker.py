@@ -3,15 +3,40 @@ from __future__ import annotations
 import threading
 from uuid import UUID
 
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from aegisai.db.models import Inspection
 from aegisai.schemas import Decision, TierSignal
 
 _DECAY = 0.9
 _SIGNAL_WEIGHT = 0.4
 
-# In-memory, per-process store. Swap for Redis once the backend runs more
-# than one worker — scores are not shared across processes today.
+# The synchronous helpers remain useful for unit-level scoring tests. The
+# request pipeline uses the persisted score helpers below so multi-worker
+# deployments do not split a session's suspicion history across processes.
 _scores: dict[str, float] = {}
 _lock = threading.Lock()
+
+
+def next_score(previous_score: float, signals: list[TierSignal]) -> float:
+    """Calculate the next score from a persisted prior score."""
+    peak = max((s.confidence for s in signals if s.flagged), default=0.0)
+    return min(1.0, previous_score * _DECAY + peak * _SIGNAL_WEIGHT)
+
+
+async def load_persisted_score(
+    db: AsyncSession, user_id: UUID, session_id: UUID
+) -> float:
+    """Load the latest session score from the database for worker-safe state."""
+    result = await db.execute(
+        select(Inspection.session_suspicion_score)
+        .where(Inspection.user_id == user_id, Inspection.session_id == session_id)
+        .order_by(Inspection.turn_id.desc(), Inspection.created_at.desc())
+        .limit(1)
+    )
+    value = result.scalar_one_or_none()
+    return float(value or 0.0)
 
 
 def update(
@@ -26,10 +51,9 @@ def update(
     policy needs this turn's score.
     """
     _ = decision
-    peak = max((s.confidence for s in signals if s.flagged), default=0.0)
     key = str(session_id)
     with _lock:
-        new_score = min(1.0, _scores.get(key, 0.0) * _DECAY + peak * _SIGNAL_WEIGHT)
+        new_score = next_score(_scores.get(key, 0.0), signals)
         _scores[key] = new_score
     return new_score
 

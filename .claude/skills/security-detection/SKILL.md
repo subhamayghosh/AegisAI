@@ -33,6 +33,9 @@ still match.
 | credential_theft | `regex:aws_credential_keys` | 0.85 |
 | encoded_instructions | `regex:encoded_decode_and_comply` | 0.88 |
 | encoded_instructions | `regex:encoded_instructions_marker` | 0.80 |
+| secret_extraction | `regex:indirect_secret_guidance` | 0.92 |
+| encoded_instructions | `regex:encoded_puzzle_comply` | 0.92 |
+| multi_step_jailbreak | `regex:trust_escalation_to_harm` | 0.95 |
 
 Known benign near-misses these rules deliberately do **not** match (kept as
 regression cases in `tests/unit/tiers/test_tier1.py`): "ignore case", "act as a
@@ -213,6 +216,12 @@ re-run `tests/unit/core/test_session_tracker.py`, which pins these numbers.
 - **Order:** tiers → `session_tracker.update()` → `policy_engine.decide()`
   (so the policy sees this turn's score) → `sanitizer.sanitize()` (skipped
   on BLOCK).
+
+- **Worker-safe session scores:** the request pipeline loads the latest
+  suspicion score from `inspections` and calculates the next score without
+  relying on process-local state. The synchronous in-memory helpers remain
+  for isolated unit tests and reset behavior, but multi-worker request paths
+  use the persisted score.
 
 **Neutralization fallback.** Tier 2 and Tier 3 can identify malicious meaning
 without a character span. When that happens, the sanitizer wraps the full

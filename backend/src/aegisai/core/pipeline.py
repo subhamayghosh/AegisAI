@@ -281,10 +281,9 @@ async def run_pipeline(request: FirewallRequest, user: User, db: AsyncSession) -
     parsed = await _parse(request, working_model_id)
     text = parsed.text
 
-    # session_id is client-supplied, so scope it to the user — otherwise one
-    # user could inflate or decay another user's session score.
-    tracker_key = f"{user.id}:{session_id}"
-    prior_score = session_tracker.get_score(tracker_key)
+    # session_id is client-supplied, so scope the persisted lookup to the
+    # authenticated user — otherwise one user could read another's score.
+    prior_score = await session_tracker.load_persisted_score(db, user.id, session_id)
 
     signals = await _run_tier1(text, source_type)
     tier1_peak = max((s.confidence for s in signals if s.flagged), default=0.0)
@@ -296,7 +295,7 @@ async def run_pipeline(request: FirewallRequest, user: User, db: AsyncSession) -
             await tier3_llm_judge.detect(text, source_type, session_context=context, user=user)
         )
 
-    session_score = session_tracker.update(tracker_key, signals)
+    session_score = session_tracker.next_score(prior_score, signals)
     decision, reason = policy_engine.decide(signals, session_score, source_type)
     sanitized_text = (
         None if decision == Decision.BLOCK else sanitizer.sanitize(text, signals, source_type)

@@ -156,7 +156,7 @@ Testing (see [`.claude/skills/testing/SKILL.md`](./.claude/skills/testing/SKILL.
 ```bash
 cd backend  && python -m pytest tests/unit tests/integration tests/e2e -v --cov
 cd frontend && npm test -- --run
-python scripts/run_corpus.py           # 100-case regression corpus, needs the backend running
+python scripts/run_corpus.py           # 128-case regression corpus, needs the backend running
 bash scripts/run_full_suite.sh         # all three, plus a pass/fail banner (CI runs this)
 ```
 
@@ -198,7 +198,7 @@ Manual copy/paste and upload examples: [`manual_test_cases/README.md`](./manual_
 - `backend/`     — FastAPI + SQLAlchemy + Alembic
 - `frontend/`    — Vite + React 18 + Tailwind
 - `.claude/`     — Claude Code skills, sub-agents, rules, memory
-- `test_corpus/` — 100-case regression corpus
+- `test_corpus/` — 128-case regression corpus covering all 9 attack families and 11 source types
 - `scripts/`     — corpus runner, full-suite runner, secret scanner
 - `docker/`      — Dockerfiles + compose
 - `docs/`        — architecture diagrams, demo script
