@@ -52,7 +52,7 @@ export default function DemoTourPanel({
           <div className="max-w-2xl">
             <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">See the firewall think.</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-slate-300">
-              Watch real inspections move through parsing, heuristics, semantic search, Claude, and policy—one explainable decision at a time.
+              Watch real inspections move through a few simple safety checks—one explainable decision at a time.
             </p>
           </div>
           <div className="min-w-44 rounded-2xl border border-white/15 bg-white/10 px-4 py-3 lg:text-right">
@@ -96,7 +96,7 @@ export default function DemoTourPanel({
                       {item?.response ? <Check size={10} className="text-emerald-300" aria-label="Completed" /> : item?.error ? <X size={10} className="text-rose-300" aria-label="Failed" /> : isCurrent && isRunning ? <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-200" /> : <Circle size={9} className="text-slate-500" aria-label="Pending" />}
                     </span>
                     <span className="min-w-0 flex-1 truncate">{index + 1}. {scenarioLabel(scenario)}</span>
-                    {item?.response && <DecisionPill decision={item.response.final_decision} />}
+                    {item?.response && <DecisionPill friendly decision={item.response.final_decision} />}
                   </li>
                 );
               })}
@@ -120,7 +120,7 @@ export default function DemoTourPanel({
             <ArrowLeftIcon />
             Back to dashboard
           </button>
-          <span className="text-xs text-slate-400" aria-live="polite">{isRunning ? "The Inspect console below is following this scenario." : "Choose replay when you want to watch the full pipeline again."}</span>
+          <span className="text-xs text-slate-400" aria-live="polite">{isRunning ? "The progress panel below is following this scenario." : "Choose replay when you want to watch the full pipeline again."}</span>
         </div>
       </div>
     </section>

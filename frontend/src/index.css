@@ -64,6 +64,77 @@ body::selection {
   inset: 0;
 }
 
+.auth-artwork {
+  perspective: 48rem;
+  transform-style: preserve-3d;
+}
+
+.auth-artwork__orbits {
+  position: absolute;
+  z-index: 20;
+  inset: 17% -8% 40%;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.auth-orbit {
+  --orbit-angle: -10deg;
+  position: absolute;
+  inset: 14% 0;
+  border: 1px solid rgb(103 232 249 / 0.4);
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  box-shadow: 0 0 0.8rem rgb(34 211 238 / 0.18), inset 0 0 0.8rem rgb(34 211 238 / 0.08);
+  animation: auth-orbit-rotate 9s linear infinite;
+}
+
+.auth-orbit--upper {
+  --orbit-angle: -10deg;
+  transform: rotateX(68deg) rotateZ(var(--orbit-angle));
+}
+
+.auth-orbit--lower {
+  --orbit-angle: 8deg;
+  inset: 39% -3% -11%;
+  border-color: rgb(52 211 153 / 0.38);
+  transform: rotateX(68deg) rotateZ(var(--orbit-angle));
+  animation-duration: 11s;
+  animation-direction: reverse;
+}
+
+.auth-orbit__ball {
+  position: absolute;
+  top: 50%;
+  left: -0.55rem;
+  height: 1.05rem;
+  width: 1.05rem;
+  border: 1px solid rgb(255 255 255 / 0.7);
+  border-radius: 999px;
+  transform: translateY(-50%) translateZ(1.35rem);
+  box-shadow: 0 0 0.55rem currentColor, 0 0 1.15rem currentColor;
+}
+
+.auth-orbit__ball--green {
+  color: rgb(52 211 153);
+  background: radial-gradient(circle at 28% 24%, white 0 7%, rgb(167 243 208) 12%, rgb(16 185 129) 48%, rgb(6 78 59) 100%);
+}
+
+.auth-orbit__ball--cyan {
+  left: auto;
+  right: -0.55rem;
+  color: rgb(34 211 238);
+  background: radial-gradient(circle at 28% 24%, white 0 7%, rgb(165 243 252) 12%, rgb(6 182 212) 48%, rgb(8 47 73) 100%);
+}
+
+@keyframes auth-orbit-rotate {
+  from { transform: rotateX(68deg) rotateZ(var(--orbit-angle)) rotateY(0deg); }
+  to { transform: rotateX(68deg) rotateZ(var(--orbit-angle)) rotateY(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-orbit { animation: none; }
+}
+
 [data-theme="light"] .app-shell-ambient {
   opacity: 0.62;
 }

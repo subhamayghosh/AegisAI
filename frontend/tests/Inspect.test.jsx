@@ -104,13 +104,37 @@ describe("Inspect", () => {
 
     await waitFor(() => expect(firewallApi.inspect).toHaveBeenCalledTimes(1));
 
-    expect(await screen.findByText("BLOCK")).toBeInTheDocument();
-    expect(screen.getByText("Instruction override")).toBeInTheDocument();
+    expect(await screen.findByRole("dialog", { name: /your safety result/i })).toBeInTheDocument();
+    expect(await screen.findByText("This content was stopped")).toBeInTheDocument();
+    expect(screen.getByText(/was trying to replace the assistant.s instructions/i)).toBeInTheDocument();
     expect(
-      screen.getByText("Tier 1 high-confidence match on instruction override")
+      screen.getAllByText("Wording check")[1]
     ).toBeInTheDocument();
-    expect(screen.getByText("regex:ignore_previous_instructions")).toBeInTheDocument();
-    expect(screen.getByText("95%")).toBeInTheDocument();
+    expect(screen.getAllByText("No separate concern found")).toHaveLength(2);
+    expect(screen.getByText("95% certainty")).toBeInTheDocument();
+  });
+
+  it("opens the result in an overlay and returns it to the result panel when closed", async () => {
+    firewallApi.inspect.mockResolvedValue({
+      final_decision: "ALLOW",
+      source_type: "user_message",
+      sanitized_text: null,
+      tier_signals: [],
+      latency_ms_total: 12,
+    });
+
+    renderInspect();
+    fireEvent.change(screen.getByLabelText(/content/i), { target: { value: "A normal request." } });
+    fireEvent.click(screen.getByRole("button", { name: /^inspect$/i }));
+
+    const dialog = await screen.findByRole("dialog", { name: /your safety result/i });
+    expect(dialog).toHaveTextContent("This content can continue");
+
+    fireEvent.click(screen.getByRole("button", { name: /close result overlay/i }));
+
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: /your safety result/i })).not.toBeInTheDocument());
+    expect(screen.getByText("This content can continue")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open full result/i })).toBeInTheDocument();
   });
 
   it("writes every live pipeline stage once while a slow inspection is pending", async () => {
@@ -127,10 +151,10 @@ describe("Inspect", () => {
       await vi.advanceTimersByTimeAsync(10000);
     });
 
-    const trace = screen.getByRole("log", { name: /inspection trace output/i });
-    expect(trace).toHaveTextContent("parse: Reading the selected source boundary");
-    expect(trace.querySelectorAll("div")).toHaveLength(7);
-    expect(trace.textContent.match(/policy: Combining signals, sanitizing, and recording a hash/g)).toHaveLength(1);
+    const trace = screen.getByRole("log", { name: /progress details/i });
+    expect(trace).toHaveTextContent("Read your content: Keeping the source context intact");
+    expect(trace.querySelectorAll("div")).toHaveLength(6);
+    expect(trace.textContent.match(/Explain the result: Preparing a clear answer and next step/g)).toHaveLength(1);
   });
 
   it("shows the guided replay panel when launched from the dashboard", () => {
@@ -155,6 +179,6 @@ describe("Inspect", () => {
 
     await waitFor(() => expect(firewallApi.inspect).toHaveBeenCalledTimes(1), { timeout: 3000 });
     expect(await screen.findByText("Replay complete")).toBeInTheDocument();
-    expect(screen.getAllByText("BLOCK")).toHaveLength(2);
+    expect(screen.getAllByText("Stopped")).toHaveLength(2);
   });
 });

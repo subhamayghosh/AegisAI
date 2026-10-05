@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from aegisai.config import get_settings
 from aegisai.schemas import Decision, SourceType, TierSignal
 
 # "Retrieved" sources per the architecture doc — content the caller didn't

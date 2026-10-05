@@ -1,10 +1,10 @@
-export default function ConfidenceBar({ value }) {
+export default function ConfidenceBar({ value, label = "Confidence" }) {
   const pct = Math.round(Math.min(Math.max(value ?? 0, 0), 1) * 100);
   return (
     <div className="flex items-center gap-2">
       <div
         role="meter"
-        aria-label="Confidence"
+        aria-label={label}
         aria-valuenow={pct}
         aria-valuemin={0}
         aria-valuemax={100}

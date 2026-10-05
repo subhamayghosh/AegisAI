@@ -28,11 +28,21 @@ export default function AuthVisual({ mode }) {
 
         <div className="relative mx-auto flex w-full max-w-xl flex-1 flex-col items-center justify-center py-7 text-center">
           <div className="absolute h-72 w-72 rounded-full bg-violet-500/25 blur-3xl" aria-hidden="true" />
-          <img
-            src="/images/auth-shield-3d.png"
-            alt="A 3D shield protecting an AI prompt stream"
-            className="relative z-10 -mb-3 w-full max-w-[16rem] drop-shadow-[0_30px_50px_rgba(34,211,238,0.25)] lg:-mb-6 lg:max-w-[25rem]"
-          />
+          <div className="auth-artwork relative w-full max-w-[16rem] lg:max-w-[25rem]">
+            <img
+              src="/images/auth-shield-3d.png"
+              alt="A 3D shield protecting an AI prompt stream"
+              className="relative z-10 -mb-3 w-full drop-shadow-[0_30px_50px_rgba(34,211,238,0.25)] lg:-mb-6"
+            />
+            <div className="auth-artwork__orbits" aria-hidden="true">
+              <div className="auth-orbit auth-orbit--upper">
+                <span className="auth-orbit__ball auth-orbit__ball--green" />
+              </div>
+              <div className="auth-orbit auth-orbit--lower">
+                <span className="auth-orbit__ball auth-orbit__ball--cyan" />
+              </div>
+            </div>
+          </div>
           <div className="relative z-10 mt-1 max-w-md">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1 text-xs font-medium text-cyan-100">
               <Sparkles size={13} aria-hidden="true" /> Adaptive AI security

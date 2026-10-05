@@ -204,6 +204,10 @@ Manual copy/paste and upload examples: [`manual_test_cases/README.md`](./manual_
 - `docs/`        — architecture diagrams, demo script
 - `manual_test_cases/` — safe Inspect fixtures and expected manual outcomes
 
+The repository includes a Gitleaks wrapper at `scripts/secret_scan.sh`; run it
+before commits in an environment with Gitleaks installed. CI runs the same
+policy on every branch push and pull request.
+
 ## Contributing
 
 This repo is built with Claude Code as a first-class collaborator — read

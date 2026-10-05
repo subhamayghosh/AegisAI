@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import * as firewallApi from "../api/firewall";
 import { inspectionStages } from "../components/InspectionConsole";
 import { INSPECTION_QUOTES } from "../inspectionQuotes";
+import { FRIENDLY_DECISIONS } from "../utils/inspectionFeedback";
 
 const MIN_INSPECTION_FEEDBACK_MS = 650;
 
@@ -28,13 +29,12 @@ export default function useInspectionRunner(toast) {
     window.clearInterval(progressTimer.current);
     window.clearInterval(quoteTimer.current);
     const demoHeader = demoStepInfo
-      ? `demo: scenario ${demoStepInfo.index + 1}/${demoStepInfo.total} · ${scenario.label} · ${scenario.source_type}`
+      ? `Guided replay: check ${demoStepInfo.index + 1} of ${demoStepInfo.total}`
       : null;
     setConsoleEntries([
-      "$ aegis inspect --live-trace",
+      "Starting a safety check",
       ...(demoHeader ? [demoHeader] : []),
-      "$ authenticated request accepted",
-      `${stages[0][0]}: ${stages[0][2]}`,
+      `${stages[0][1]}: ${stages[0][2]}`,
     ]);
     setProgressStep(0);
     setQuoteIndex(0);
@@ -46,7 +46,7 @@ export default function useInspectionRunner(toast) {
       }
       nextStep += 1;
       const stageIndex = nextStep;
-      const stageEntry = `${stages[stageIndex][0]}: ${stages[stageIndex][2]}`;
+      const stageEntry = `${stages[stageIndex][1]}: ${stages[stageIndex][2]}`;
       setProgressStep(stageIndex);
       setConsoleEntries((items) => [...items, stageEntry]);
     }, 720);
@@ -60,15 +60,15 @@ export default function useInspectionRunner(toast) {
     window.clearInterval(quoteTimer.current);
     const flaggedSignals = response?.tier_signals?.filter((signal) => signal.flagged) ?? [];
     const signalSummary = flaggedSignals.length
-      ? flaggedSignals.map((signal) => `${signal.tier} ${Math.round(signal.confidence * 100)}%`).join(" · ")
-      : "no tier flagged";
+      ? `${flaggedSignals.length} check${flaggedSignals.length === 1 ? "" : "s"} needs attention`
+      : "No additional concern was found";
     setProgressStep(stages.length);
     setConsoleEntries((items) => [
       ...items,
       error
-        ? "request: closed with an error; no unverified decision shown"
-        : `decision: ${response.final_decision} · ${response.latency_ms_total}ms · audit hash recorded`,
-      ...(error ? [] : [`signals: ${signalSummary}`, `models: ${response.working_model_id} → ${response.judge_model_id}`]),
+        ? "We could not complete this check, so no verdict is shown."
+        : `Decision ready — ${FRIENDLY_DECISIONS[response.final_decision]?.title ?? "Your result is ready"} · ${response.latency_ms_total} ms`,
+      ...(error ? [] : [signalSummary]),
     ]);
   };
 

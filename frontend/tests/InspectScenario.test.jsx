@@ -44,7 +44,7 @@ describe("Inspect demo inputs", () => {
     fireEvent.click(screen.getByRole("button", { name: /attach file/i }));
 
     expect(screen.getByLabelText(/attachment/i)).toBeInTheDocument();
-    expect(screen.getByText(/text attachments are read locally/i)).toBeInTheDocument();
+    expect(screen.getByText(/the attachment is read locally/i)).toBeInTheDocument();
     expect(firewallApi.inspect).not.toHaveBeenCalled();
   });
 });

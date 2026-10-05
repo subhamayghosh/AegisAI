@@ -79,9 +79,11 @@ sources per Appendix A) — each module has its own tiny `_to_bytes` helper.
   - Parsers run in `asyncio.to_thread` (OCR / big PDFs would block the loop).
   - **Tier 2 never imports on the request path.** `_Tier2Loader` loads
     `tier2_semantic` (which loads its model at import) on a daemon thread,
-    started by `main.py`'s lifespan via `pipeline.warm_up()`. Until it's
-    ready, requests get an unflagged `matched_rule="tier2_unavailable"`
-    signal. `import aegisai.main` must stay free of model loading.
+    started by `main.py`'s lifespan via `pipeline.warm_up()`. The lifespan
+    does not await model readiness, so auth and other non-inspection routes
+    are available while a cold model loads. Until it's ready, inspection
+    requests get an unflagged `matched_rule="tier2_unavailable"` signal.
+    `import aegisai.main` must stay free of model loading.
   - Session scores and session context are keyed by **user + session_id**
     (`f"{user.id}:{session_id}"` in the tracker, `user_id` filter in SQL):
     `session_id` is client-supplied, so keying by it alone would let one
@@ -121,3 +123,14 @@ test already cached (`cache_logger_on_first_use=True`), making it order-dependen
 ## Bounded image OCR
 
 The image parser uses `ImageOps.exif_transpose`, composites transparency onto white, converts to RGB, downsizes any image larger than `OCR_MAX_DIMENSION`, and passes `OCR_TIMEOUT_S` to Tesseract. A timeout is surfaced as HTTP 408 with an actionable message. If the Tesseract executable is missing and `OCR_VISION_FALLBACK=true`, the pipeline prepares a JPEG capped by `OCR_VISION_MAX_DIMENSION` and calls the configured Anthropic working model through `llm/image_ocr.py`, bounded by `OCR_VISION_TIMEOUT_S`. The OCR prompt treats every image instruction as untrusted text to transcribe; it never logs image bytes or extracted text. Keep local OCR work inside `asyncio.to_thread` so the event loop cannot be blocked.
+## Protected demo gateway and metrics
+
+The demo-only `/agent/chat` and `/agent/rag/query` routes call the same
+`run_pipeline()` used by `/firewall/inspect` before returning a simulated
+downstream response. A BLOCK is never forwarded; a NEUTRALIZE response only
+forwards the sanitized boundary. Keep these routes clearly labelled as a
+demonstration gateway rather than a production agent integration.
+
+`GET /metrics` is a Prometheus-compatible, privacy-safe counter endpoint. It
+may expose totals and enum labels, but must never include input hashes, raw
+content, emails, IPs, or model secrets.

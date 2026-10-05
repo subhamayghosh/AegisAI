@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { ArrowRight, Loader2, ShieldCheck, Sparkles } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthVisual from "../components/AuthVisual";
@@ -17,6 +17,14 @@ function passwordStrength(password) {
 
 const STRENGTH_LABELS = ["Very weak", "Weak", "Fair", "Good", "Strong"];
 const STRENGTH_COLORS = ["bg-block", "bg-block", "bg-neutralize", "bg-primary", "bg-allow"];
+
+// One wording for the duplicate-email case, shown both inline on the field and
+// as a toast, so every retry reads the same.
+const EMAIL_TAKEN_MESSAGE = "An account with that email already exists. Sign in instead.";
+
+// The backend lower-cases the address before its uniqueness check, so compare
+// the same way or a re-typed "User@x.com" would look like a fresh address.
+const normalizeEmail = (value) => value.trim().toLowerCase();
 
 function validate({ email, password, confirmPassword, displayName }) {
   const errors = {};
@@ -42,15 +50,40 @@ export default function Register() {
   const [form, setForm] = useState({ displayName: "", email: "", password: "", confirmPassword: "" });
   const [errors, setErrors] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const takenEmails = useRef(new Set());
 
-  const handleChange = (field) => (event) => setForm((previous) => ({ ...previous, [field]: event.target.value }));
+  const handleChange = (field) => (event) => {
+    const { value } = event.target;
+    setForm((previous) => ({ ...previous, [field]: value }));
+    setErrors((previous) => {
+      if (!previous[field]) return previous;
+      const next = { ...previous };
+      delete next[field];
+      return next;
+    });
+  };
   const strength = passwordStrength(form.password);
+
+  const reportEmailTaken = () => {
+    setErrors({ email: EMAIL_TAKEN_MESSAGE });
+    toast.error(EMAIL_TAKEN_MESSAGE);
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validation = validate(form);
     setErrors(validation);
     if (Object.keys(validation).length > 0) return;
+
+    // A taken email stays taken, so report it identically on every attempt.
+    // Re-posting would only burn the register rate limit and surface an
+    // unrelated 429 message for a condition the user has already been told
+    // about. Mirrors the "validate in the browser, show it inline" rule the
+    // Inspect page follows for session ids.
+    if (takenEmails.current.has(normalizeEmail(form.email))) {
+      reportEmailTaken();
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -59,9 +92,14 @@ export default function Register() {
     } catch (error) {
       const status = error.response?.status;
       if (status === 409 || status === 400) {
-        toast.error("An account with that email already exists.");
+        takenEmails.current.add(normalizeEmail(form.email));
+        reportEmailTaken();
       } else if (status === 422) {
         toast.error("Please check your details and try again.");
+      } else if (status === 429) {
+        toast.error("Too many attempts. Please wait a minute and try again.");
+      } else if (!error.response) {
+        toast.error("AegisAI is not reachable. Start the backend and frontend, then try again.");
       } else {
         toast.error("Registration failed. Please try again.");
       }
