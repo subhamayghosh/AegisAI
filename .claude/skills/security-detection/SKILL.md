@@ -71,7 +71,7 @@ automatically — no separate list to maintain in `sanitizer.py`.
 
 `detect(text, source_type) -> TierSignal` embeds `text` with the local
 `sentence-transformers/all-MiniLM-L6-v2` encoder (CPU) and compares it via
-cosine similarity against `CORPUS` — 57 hand-written attack paraphrases
+cosine similarity against `CORPUS` — 147 hand-written attack paraphrases
 across all 9 types (unlike Tier 1, which only covers the 6 literally-regexable
 ones). Both the corpus and query embeddings are L2-normalized. Linux/GHA/
 container installs search them through a FAISS `IndexFlatIP`; Windows/macOS
@@ -214,12 +214,12 @@ re-run `tests/unit/core/test_session_tracker.py`, which pins these numbers.
   (so the policy sees this turn's score) → `sanitizer.sanitize()` (skipped
   on BLOCK).
 
-**Known gap — NEUTRALIZE can leave text unchanged.** The sanitizer only acts
-on `regex:`/`encoded:` matches and wraps retrieved source types. When a
-`user_message`/`markdown`/`email`/etc. input is NEUTRALIZEd because of a
-Tier 2 or Tier 3 signal alone, `sanitized_text` equals the input. Decide
-whether those cases should be wrapped too (or escalated) before relying on
-NEUTRALIZE for non-retrieved sources.
+**Neutralization fallback.** Tier 2 and Tier 3 can identify malicious meaning
+without a character span. When that happens, the sanitizer wraps the full
+payload in `<untrusted_content>` data delimiters so a downstream agent cannot
+mistake a successful `NEUTRALIZE` decision for permission to follow the text.
+External sources are wrapped even when a narrower regex redaction was also
+possible.
 
 ## OCR safety guardrails
 

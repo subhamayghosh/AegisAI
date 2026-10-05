@@ -9,7 +9,7 @@ from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from aegisai.api import admin, auth, firewall, history, sessions, settings, users
+from aegisai.api import admin, auth, firewall, history, metrics, mock_agent, sessions, settings, users
 from aegisai.config import get_settings
 from aegisai.core import pipeline
 from aegisai.logging_ import configure_logging
@@ -21,11 +21,10 @@ configure_logging(_settings.log_level)
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    # Start and await Tier 2 before serving requests. MiniLM loading and the
-    # 147-vector index can take over two minutes on a cold Windows process;
-    # serving first would make a legitimate first inspection look unavailable.
+    # Start Tier 2 in the background so auth and the rest of the API are
+    # available immediately. Inspection requests have their own bounded wait
+    # and receive a tier2_unavailable signal if the model is not ready yet.
     pipeline.warm_up()
-    await pipeline.wait_for_tier2()
     yield
 
 
@@ -51,9 +50,11 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(settings.router)
 app.include_router(firewall.router)
+app.include_router(mock_agent.router)
 app.include_router(history.router)
 app.include_router(sessions.router)
 app.include_router(admin.router)
+app.include_router(metrics.router)
 
 
 @app.get("/health", tags=["meta"])

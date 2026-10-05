@@ -76,7 +76,7 @@ Tier 2 catches paraphrases that do not contain Tier 1’s literal words.
 
 There are two separate pieces:
 
-1. **Embedding encoder:** sentence-transformers/all-MiniLM-L6-v2 converts the 57 audited attack paraphrases and the incoming text into normalized vectors.
+1. **Embedding encoder:** sentence-transformers/all-MiniLM-L6-v2 converts the 147 audited attack paraphrases and the incoming text into normalized vectors.
 2. **Vector index:** FAISS IndexFlatIP searches those vectors using inner product, which is cosine similarity because the vectors are L2-normalized.
 
 FAISS does not replace the embedding model. It replaces the brute-force NumPy similarity search. The model gives meaning to text; FAISS finds the closest meaningful vector.
@@ -220,3 +220,14 @@ If Tier 2 cannot load, the backend remains available and explicitly reports a ti
 - backend/src/aegisai/core/sanitizer.py — response sanitization
 - scripts/prewarm_tier2.py — provisioning/health check
 - docs/DEMO_SCRIPT.md — presenter-friendly live demo sequence
+
+## 6. Protected-agent demonstration boundary
+
+The demo-only `POST /agent/chat` and `POST /agent/rag/query` routes run the
+same firewall pipeline before returning a simulated downstream response. A
+BLOCK is not forwarded. A NEUTRALIZE response forwards only the sanitized
+boundary, making the “before it reaches the agent” claim directly observable
+without pretending that the demo endpoint is a production tool-using agent.
+
+`GET /metrics` exposes only privacy-safe Prometheus counters; it never exposes
+input hashes or inspected content.

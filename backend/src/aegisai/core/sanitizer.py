@@ -58,9 +58,13 @@ def _redact_encoded_span(text: str, matched_rule: str) -> str:
 def sanitize(text: str, signals: list[TierSignal], source_type: SourceType) -> str:
     """Neutralize flagged content in *text* without discarding the rest of it."""
     result = text
+    flagged = False
 
     for signal in signals:
-        if not signal.flagged or not signal.matched_rule:
+        if not signal.flagged:
+            continue
+        flagged = True
+        if not signal.matched_rule:
             continue
 
         if signal.matched_rule.startswith("encoded:"):
@@ -70,7 +74,9 @@ def sanitize(text: str, signals: list[TierSignal], source_type: SourceType) -> s
             if pattern is not None:
                 result = _strip_matching_sentence(result, pattern)
 
-    if source_type in _RETRIEVED_SOURCE_TYPES:
+    if source_type in _RETRIEVED_SOURCE_TYPES or (
+        flagged and (source_type != SourceType.user_message or result == text)
+    ):
         result = f"{_UNTRUSTED_PREAMBLE}\n<untrusted_content>\n{result}\n</untrusted_content>"
 
     return result

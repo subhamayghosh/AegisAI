@@ -111,6 +111,24 @@ class FirewallResponse(BaseModel):
     latency_ms_total: int = 0
 
 
+class AgentChatRequest(BaseModel):
+    session_id: UUID | None = None
+    turn_id: int = Field(default=1, ge=1)
+    message: str = Field(min_length=1)
+
+
+class AgentRagRequest(BaseModel):
+    session_id: UUID | None = None
+    turn_id: int = Field(default=1, ge=1)
+    query: str = Field(min_length=1)
+
+
+class AgentGatewayResponse(BaseModel):
+    firewall: FirewallResponse
+    forwarded: bool
+    agent_response: str | None = None
+
+
 # ---------------------------------------------------------------------------
 # User / Auth
 # ---------------------------------------------------------------------------
