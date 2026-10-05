@@ -27,6 +27,7 @@ describe("FriendlyResult", () => {
     );
 
     expect(screen.getByText("This content was stopped")).toBeInTheDocument();
+    expect(screen.getByText("97% confidence")).toBeInTheDocument();
     expect(screen.getAllByText(/asking for private setup or hidden instructions/i)).toHaveLength(2);
     expect(screen.getByText("No separate concern found")).toBeInTheDocument();
     expect(screen.getByText("97% certainty")).toBeInTheDocument();

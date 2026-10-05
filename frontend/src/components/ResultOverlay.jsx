@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import FriendlyResult from "./FriendlyResult";
 
@@ -21,7 +22,8 @@ export default function ResultOverlay({ result, sourceType, onClose }) {
     };
   }, [onClose]);
 
-  return (
+  return createPortal(
+    (
     <div className="fixed inset-0 z-[80] overflow-y-auto bg-slate-950/75 px-4 py-8 backdrop-blur-sm sm:px-8" role="presentation">
       <div
         className="mx-auto w-full max-w-4xl rounded-3xl border border-white/15 bg-bg/95 p-4 shadow-2xl shadow-slate-950/40 sm:p-6"
@@ -50,5 +52,7 @@ export default function ResultOverlay({ result, sourceType, onClose }) {
         <FriendlyResult result={result} sourceType={sourceType} />
       </div>
     </div>
+    ),
+    document.body
   );
 }

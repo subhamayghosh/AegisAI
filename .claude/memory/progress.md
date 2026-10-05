@@ -58,3 +58,5 @@
 2026-10-05 18:05  Codex  Fixed login hangs during cold startup by serving the API immediately while Tier 2 warms in the background; added a lifespan regression test and updated backend guidance.
 2026-10-05 19:00  Codex  Added a reduced-motion-aware CSS 3D orbit layer to the authentication shield artwork so the security balls rotate independently around the static shield.
 2026-10-05 19:20  Codex  Added an accessible auto-opening inspection-result overlay with Escape/close controls, focus return, scroll restoration, and inline-result fallback after dismissal.
+2026-10-05 19:35  Codex  Portaled the inspection-result overlay to document.body so its backdrop covers the full application viewport above the navigation and page content.
+2026-10-05 19:40  Codex  Added a plain-language confidence percentage beside the AegisAI verdict, derived from the strongest relevant safety check.

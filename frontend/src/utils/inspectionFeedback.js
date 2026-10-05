@@ -47,6 +47,14 @@ export function getSignalMessage(check) {
   return check.tier === "tier3_llm_judge" ? `A closer look found that this is ${explanation}.` : `This check found wording consistent with ${explanation}.`;
 }
 
+export function getVerdictConfidence(result) {
+  const signals = (result?.tier_signals || []).filter((signal) => Number.isFinite(signal?.confidence));
+  if (!signals.length) return 1;
+  const flagged = signals.filter((signal) => signal.flagged);
+  const strongestConcern = Math.max(...(flagged.length ? flagged : signals).map((signal) => Math.max(0, Math.min(1, signal.confidence))));
+  return result?.final_decision === "ALLOW" ? 1 - strongestConcern : strongestConcern;
+}
+
 export function getResultContext(result) {
   const flagged = result?.tier_signals?.find((signal) => signal.flagged && signal.attack_type) || result?.tier_signals?.find((signal) => signal.attack_type);
   const explanation = flagged ? attackExplanation(flagged.attack_type) : "a risky instruction";

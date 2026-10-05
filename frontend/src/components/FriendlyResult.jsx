@@ -1,5 +1,5 @@
 import { CheckCircle2, ChevronDown, ShieldAlert, ShieldCheck, ShieldX, Sparkles } from "lucide-react";
-import { FRIENDLY_DECISIONS, getFriendlyChecks, getResultContext, getSignalMessage, sourceLabel } from "../utils/inspectionFeedback";
+import { FRIENDLY_DECISIONS, getFriendlyChecks, getResultContext, getSignalMessage, getVerdictConfidence, sourceLabel } from "../utils/inspectionFeedback";
 import ConfidenceBar from "./ConfidenceBar";
 
 const TONE_STYLES = {
@@ -21,6 +21,7 @@ export default function FriendlyResult({ result, sourceType = null }) {
   const context = getResultContext({ ...result, source_type: result.source_type || sourceType });
   const checks = getFriendlyChecks(result.tier_signals);
   const source = sourceLabel(result.source_type || sourceType);
+  const verdictConfidence = Math.round(getVerdictConfidence(result) * 100);
 
   return (
     <div className="space-y-4" aria-label="Inspection result">
@@ -32,6 +33,7 @@ export default function FriendlyResult({ result, sourceType = null }) {
             <div className="flex flex-wrap items-center gap-2">
               <p className={`text-xs font-bold uppercase tracking-[0.16em] ${tone.accent}`}>AegisAI verdict</p>
               <span className="rounded-full border border-current/20 px-2 py-0.5 text-[11px] font-semibold">{decision.label}</span>
+              <span className="rounded-full bg-surface/70 px-2 py-0.5 text-[11px] font-semibold text-textMuted">{verdictConfidence}% confidence</span>
             </div>
             <h2 className="mt-2 text-2xl font-semibold tracking-tight">{decision.title}</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-textMuted">{decision.description}</p>
