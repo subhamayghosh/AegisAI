@@ -1,11 +1,12 @@
 import { Check, Circle, Loader2, Terminal } from "lucide-react";
+import { FRIENDLY_DECISIONS } from "../utils/inspectionFeedback";
 
 const STAGES = [
-  ["parse", "Normalize input", "Reading the selected source boundary"],
-  ["tier1", "Tier 1 · Heuristic", "Scanning rules and encoded payloads"],
-  ["tier2", "Tier 2 · Semantic", "Comparing meaning against local attack patterns"],
-  ["tier3", "Tier 3 · Claude judge", "Asking the configured Anthropic judge for intent"],
-  ["policy", "Policy + audit", "Combining signals, sanitizing, and recording a hash"],
+  ["parse", "Read your content", "Keeping the source context intact"],
+  ["tier1", "Wording check", "Looking for direct attempts to take control"],
+  ["tier2", "Meaning check", "Looking for hidden or indirect requests"],
+  ["tier3", "Safety review", "Understanding what the content is trying to do"],
+  ["policy", "Explain the result", "Preparing a clear answer and next step"],
 ];
 
 export function inspectionStages() {
@@ -23,15 +24,15 @@ export default function InspectionConsole({ active, step, entries, quote }) {
   const completedRun = !active && entries.length > 0;
 
   return (
-    <section className="rounded-2xl border border-slate-600 bg-gradient-to-br from-slate-900 via-slate-900 to-[#07101f] p-5 text-slate-100 shadow-[0_18px_45px_rgba(2,6,23,0.28)]" aria-label="Live inspection console">
+    <section className="rounded-2xl border border-slate-600 bg-gradient-to-br from-slate-900 via-slate-900 to-[#07101f] p-5 text-slate-100 shadow-[0_18px_45px_rgba(2,6,23,0.28)]" aria-label="Safety check progress">
       <div className="flex items-center justify-between gap-3 border-b border-slate-700 pb-3">
         <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-cyan-300">
           <Terminal size={15} aria-hidden="true" />
-          Live inspection console
+          Safety check progress
         </div>
         <span className="flex items-center gap-1.5 text-xs font-medium text-emerald-200">
           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-300" />
-          {active ? "processing" : "ready"}
+          {active ? "checking" : "ready"}
         </span>
       </div>
 
@@ -53,13 +54,13 @@ export default function InspectionConsole({ active, step, entries, quote }) {
       </ol>
 
       <div
-        className="mt-4 max-h-72 overflow-y-auto rounded-xl border border-slate-600 bg-[#050b16] p-3.5 font-mono text-xs leading-5 text-slate-200 shadow-inner"
+        className="mt-4 max-h-72 overflow-y-auto rounded-xl border border-slate-600 bg-[#050b16] p-3.5 font-sans text-xs leading-5 text-slate-200 shadow-inner"
         role="log"
-        aria-label="Inspection trace output"
+        aria-label="Progress details"
         aria-live="polite"
       >
         {entries.length === 0 ? (
-          <span className="text-slate-400">$ awaiting inspection input…</span>
+          <span className="text-slate-400">Waiting for your content…</span>
         ) : (
           entries.map((entry, index) => (
             <div key={`${entry}-${index}`} className="flex gap-2">

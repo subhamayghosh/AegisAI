@@ -75,3 +75,8 @@ Validate a non-empty Session ID in the browser before submitting and show the er
 The Dashboard's **Launch live demo** action navigates to `/inspect?demo=1&autostart=1`. Inspect owns the guided replay: it presents the scenario queue and progress, runs the existing synthetic `DEMO_ATTACKS` through the real API, and lets the user stop after the current check or replay the tour. Keep the replay state separate from manual form state so the user can still use `/inspect` without query parameters for one-off inspections.
 
 Keep the live console's stage details, trace output, and quote attribution at high contrast on its dark navy surface (`slate-300` or brighter). Log each pipeline stage once, stop the progress timer after the policy stage, and expose trace lines through the labelled `role="log"` region so long-running inspections remain readable without producing duplicate terminal entries.
+
+
+## User-facing inspection explanations
+
+The Inspect result translates backend signals into plain-language feedback in `src/components/FriendlyResult.jsx` and `src/utils/inspectionFeedback.js`. Always render all three check slots, including an explicit no-additional-concern state when a check is not flagged. Do not expose model IDs, internal rule names, tier names, raw backend reasons, or developer trace text in the end-user result; use friendly decision copy, a short explanation, and an actionable next step.

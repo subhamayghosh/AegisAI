@@ -3,12 +3,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { ShieldQuestion } from "lucide-react";
 import { useToast } from "../hooks/useToast";
 import useInspectionRunner from "../hooks/useInspectionRunner";
-import DecisionPill from "../components/DecisionPill";
+import FriendlyResult from "../components/FriendlyResult";
 import DemoTourPanel from "../components/DemoTourPanel";
-import SignalCard from "../components/SignalCard";
+
 import ThreeDSpinner from "../components/ThreeDSpinner";
 import InspectionConsole from "../components/InspectionConsole";
-import { ATTACK_TYPE_LABELS, SOURCE_TYPES } from "../constants";
+import { SOURCE_TYPES } from "../constants";
 import { DEMO_ATTACKS } from "../demoAttacks";
 import { DEMO_SCENARIOS, getDemoScenario } from "../demoScenarios";
 
@@ -214,11 +214,6 @@ export default function Inspect() {
     });
   };
 
-  const attackSignal = result
-    ? result.tier_signals.find((s) => s.flagged && s.attack_type) ||
-      result.tier_signals.find((s) => s.attack_type)
-    : null;
-
   const demoIsRunning = demoStatus === "running" || demoStatus === "stopping";
 
   return (
@@ -240,7 +235,7 @@ export default function Inspect() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">{demoMode ? "Guided threat lab" : "Live threat lab"}</p>
           <h1 className="mt-1 text-lg font-semibold">{demoMode ? "Follow the active inspection" : "Inspect an input"}</h1>
-          <p className="mt-1 text-sm leading-6 text-textMuted">{demoMode ? "The demo is driving the form below. Watch the console on the right for the active request and its security signals." : "Paste a prompt or attach a real source. AegisAI keeps the source boundary visible while it checks every layer."}</p>
+          <p className="mt-1 text-sm leading-6 text-textMuted">{demoMode ? "The guided tour is driving the form below. Watch each safety check explain its part in the decision." : "Paste a prompt or attach a source. AegisAI will explain what it found in plain language."}</p>
         </div>
 
         <div>
@@ -261,7 +256,7 @@ export default function Inspect() {
 
         <div className="rounded-2xl border border-primary/20 bg-primary/5 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <div><p className="text-sm font-medium">Three-tier Claude probe</p><p className="mt-0.5 text-xs leading-5 text-textMuted">A nuanced authority trap that avoids the strongest Tier 1 short-circuit.</p></div>
+            <div><p className="text-sm font-medium">Full safety review</p><p className="mt-0.5 text-xs leading-5 text-textMuted">A realistic authority trap that lets every safety check explain what it noticed.</p></div>
             <button type="button" onClick={loadThreeTierProbe} className="rounded-xl border border-primary/30 bg-surface px-3 py-2 text-xs font-semibold text-primary transition hover:bg-primary/10">Load probe</button>
           </div>
         </div>
@@ -277,7 +272,7 @@ export default function Inspect() {
           <div>
             <label htmlFor="file" className="block text-sm font-medium">Attachment</label>
             <input id="file" type="file" accept={FILE_ACCEPT[sourceType]} onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="mt-1 w-full rounded-xl border border-border bg-bg px-3 py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-primary" />
-            <p className="mt-1 text-xs text-textMuted">{BINARY_SOURCE_TYPES.has(sourceType) ? "Binary attachments are encoded in memory, then decoded only by the selected parser." : "Text attachments are read locally and sent through the same source-specific parser as pasted content."}</p>
+            <p className="mt-1 text-xs text-textMuted">{BINARY_SOURCE_TYPES.has(sourceType) ? "The file is read securely in memory before it is checked." : "The attachment is read locally and checked with the same care as pasted content."}</p>
           </div>
         ) : (
           <div>
@@ -326,20 +321,15 @@ export default function Inspect() {
         <InspectionConsole active={submitting} step={progressStep} entries={consoleEntries} quote={quote} />
         <div className="rounded-card border border-border bg-surface p-5">
           <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-            <h2 className="text-lg font-semibold">{demoMode ? "Current decision" : "Result"}</h2>
+            <h2 className="text-lg font-semibold">{demoMode ? "Current verdict" : "Your result"}</h2>
             {demoMode && demoStep >= 0 && <span className="text-xs text-textMuted">Scenario {demoStep + 1} of {DEMO_ATTACKS.length}</span>}
           </div>
           {submitting ? (
-            <div className="flex flex-col items-center justify-center gap-4 py-10 text-center text-textMuted"><ThreeDSpinner label="Inspecting input through the security pipeline" /><div><p className="text-sm font-medium text-text">Inspecting through the security pipeline</p><p className="mt-1 text-xs">Parsing the source, checking all three tiers, and waiting for policy.</p></div></div>
+            <div className="flex flex-col items-center justify-center gap-4 py-10 text-center text-textMuted"><ThreeDSpinner label="Inspecting your content safely" /><div><p className="text-sm font-medium text-text">Checking your content safely</p><p className="mt-1 text-xs">Reading the source, checking its meaning, and preparing a clear explanation.</p></div></div>
           ) : !result ? (
-            <div className="flex flex-col items-center justify-center gap-2 py-10 text-center text-textMuted"><ShieldQuestion size={32} aria-hidden="true" /><p className="text-sm">Run an inspection to see the decision and tier signals.</p></div>
+            <div className="flex flex-col items-center justify-center gap-2 py-10 text-center text-textMuted"><ShieldQuestion size={32} aria-hidden="true" /><p className="text-sm">Run an inspection to see a clear verdict and explanation.</p></div>
           ) : (
-            <div className="space-y-4">
-              <div className="flex items-center gap-3"><DecisionPill decision={result.final_decision} />{attackSignal && <span className="rounded-full bg-surfaceAlt px-2.5 py-0.5 text-xs font-medium text-textMuted">{ATTACK_TYPE_LABELS[attackSignal.attack_type] ?? attackSignal.attack_type}</span>}</div>
-              <p className="text-sm text-textMuted">{result.reason}</p>
-              <div className="grid gap-3 sm:grid-cols-2">{result.tier_signals.map((signal, idx) => <SignalCard key={`${signal.tier}-${idx}`} signal={signal} />)}</div>
-              {result.sanitized_text && <details className="rounded-card border border-border bg-surfaceAlt p-3"><summary className="cursor-pointer text-sm font-medium">Sanitized text</summary><pre className="mt-2 whitespace-pre-wrap text-xs text-textMuted">{result.sanitized_text}</pre></details>}
-            </div>
+            <FriendlyResult result={result} sourceType={sourceType} />
           )}
         </div>
       </div>

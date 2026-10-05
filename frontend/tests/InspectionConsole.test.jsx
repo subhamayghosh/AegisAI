@@ -8,7 +8,7 @@ describe("InspectionConsole", () => {
       <InspectionConsole
         active
         step={2}
-        entries={["tier2: Comparing meaning against local attack patterns"]}
+        entries={["tier2: Looking for hidden or indirect requests"]}
         quote={{
           quote: "Security is a process, not a product.",
           author: "Bruce Schneier",
@@ -17,8 +17,8 @@ describe("InspectionConsole", () => {
       />
     );
 
-    expect(screen.getByText("Comparing meaning against local attack patterns")).toHaveClass("text-slate-300");
-    expect(screen.getByRole("log", { name: /inspection trace output/i })).toHaveClass(
+    expect(screen.getByText("Looking for hidden or indirect requests")).toHaveClass("text-slate-300");
+    expect(screen.getByRole("log", { name: /progress details/i })).toHaveClass(
       "bg-[#050b16]",
       "text-slate-200"
     );
