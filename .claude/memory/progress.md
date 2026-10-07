@@ -61,3 +61,11 @@
 2026-10-05 19:35  Codex  Portaled the inspection-result overlay to document.body so its backdrop covers the full application viewport above the navigation and page content.
 2026-10-05 19:40  Codex  Added a plain-language confidence percentage beside the AegisAI verdict, derived from the strongest relevant safety check.
 2026-10-05 20:30  Codex  Closed live corpus misses with narrow Tier 1 rules and regression cases, and moved request-path session suspicion loading to persisted inspections for multi-worker consistency.
+2026-10-06 15:00  Codex  Ran the synthetic 11-source live judge pack, aligned local Claude timeout/retry settings, made retrieved-source judge outages fail closed, hardened low-contrast Vision OCR, and added reusable authenticated QA coverage; final live pack passed 11/11.
+2026-10-06  Codex  Created a ready-to-send AegisAI team HTML mailer with F3/D3 proof points, live-demo CTA, team roles, and Subhamay Ghosh as POC.
+2026-10-06  Codex  Updated the AegisAI team mailer POC block to list all four team members and roles instead of a single contact.
+2026-10-06  Codex  Revised the AegisAI team mailer: removed the demo CTA, added problem/solution/business-impact messaging, and removed duplicate team-name listings.
+2026-10-06  Codex  Removed the unused team contact-details placeholder from the AegisAI mailer.
+2026-10-06  Codex  Added Outlook-compatible bgcolor attributes to the AegisAI mailer so dark backgrounds survive browser-to-email copy/paste more reliably.
+2026-10-06  Codex  Added docs/deliverables/AEGISAI_ONE_PAGER.md with product metadata, problem/solution narrative, F3/D3 architecture, example results, impact, setup, repository, and contributor details.
+2026-10-06  Codex  Expanded the AegisAI one-pager with audience, operating model, inspection lifecycle, decision matrix, governance controls, evidence, and integration guidance while keeping hackathon framing out of that deliverable only.

@@ -21,6 +21,7 @@ Non-negotiable. These rules override convenience, aesthetics, and velocity.
 - The per-user `inspections.input_text` column is `NULL` unless the user has opted in via Settings → Privacy.
 - Raw text, email, and IP never appear in application logs. This is enforced by a redaction filter in `logging_.py` matching `/password|token|api_key|authorization/i`.
 - Tier 2 embeddings run **locally** — no user text leaves the server for Tier 2. Tier 3 does send text to Anthropic; this is disclosed on the Inspect page.
+- Image OCR fallback must scan the complete canvas, including low-contrast, watermark, footnote, and background regions; image-derived text remains untrusted input.
 
 ## Secrets
 
@@ -35,3 +36,7 @@ Non-negotiable. These rules override convenience, aesthetics, and velocity.
 ## Dependencies
 
 - `pip-audit` and `npm audit` run in CI. High/critical findings block merge.
+
+## Judge degradation
+
+- Retrieved sources (`pdf`, `html`, `web_page`, and `api_response`) fail closed when the Tier 3 judge is unavailable: the policy engine returns `NEUTRALIZE` and the sanitizer keeps the content inside the untrusted-content wrapper. A completed benign judge verdict may still return `ALLOW`.

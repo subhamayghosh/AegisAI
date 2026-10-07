@@ -4,7 +4,7 @@ import base64
 from io import BytesIO
 
 import pytesseract
-from PIL import Image, ImageOps
+from PIL import Image, ImageEnhance, ImageFilter, ImageOps
 
 from aegisai.config import get_settings
 from aegisai.schemas import ParsedInput, SourceType
@@ -46,6 +46,13 @@ def prepare_for_vision(
     settings = get_settings()
     image, original_size = _load_rgb_image(content)
     _resize(image, min(settings.ocr_max_dimension, settings.ocr_vision_max_dimension))
+    # Vision fallback must handle screenshots and scanned documents where the
+    # attack is deliberately placed in a faint footnote, watermark, or small
+    # annotation. Normalize contrast after resizing so those pixels survive
+    # JPEG encoding and remain legible to the configured OCR model.
+    image = ImageOps.autocontrast(image)
+    image = ImageEnhance.Contrast(image).enhance(1.8)
+    image = image.filter(ImageFilter.SHARPEN)
 
     buffer = BytesIO()
     image.save(buffer, format="JPEG", quality=90, optimize=True)
