@@ -21,7 +21,7 @@ def _sig(
     )
 
 
-# Eight-row truth table covering every branch of the §4 policy, in the order
+# Nine-row truth table covering every branch of the §4 policy, in the order
 # the rules are evaluated.
 TRUTH_TABLE: list[tuple[str, list[TierSignal], float, SourceType, Decision]] = [
     (
@@ -67,11 +67,32 @@ TRUTH_TABLE: list[tuple[str, list[TierSignal], float, SourceType, Decision]] = [
         Decision.ALLOW,
     ),
     (
-        "nothing flagged allows even for a retrieved source type",
-        [],
+        "retrieved source with a completed benign judge verdict allows",
+        [
+            TierSignal(
+                tier=TierName.tier3_llm_judge,
+                flagged=False,
+                confidence=0.0,
+                matched_rule="llm_judge:test-model",
+            )
+        ],
         0.0,
         SourceType.pdf,
         Decision.ALLOW,
+    ),
+    (
+        "retrieved source with an unavailable judge fails closed",
+        [
+            TierSignal(
+                tier=TierName.tier3_llm_judge,
+                flagged=False,
+                confidence=0.0,
+                matched_rule="tier3_unavailable",
+            )
+        ],
+        0.0,
+        SourceType.api_response,
+        Decision.NEUTRALIZE,
     ),
     (
         "only one of two flagged signals clears 0.7, so it neutralizes rather than blocks",

@@ -13,6 +13,7 @@ _HIGH_CONFIDENCE = 0.9
 _STRONG_CONFIDENCE = 0.7
 _MODERATE_CONFIDENCE = 0.5
 _SESSION_BLOCK_THRESHOLD = 0.7
+_TIER3_UNAVAILABLE_RULE = "tier3_unavailable"
 
 
 def _label(signal: TierSignal) -> str:
@@ -64,6 +65,17 @@ def decide(
         return (
             Decision.NEUTRALIZE,
             f"retrieved content ({source_type.value}) carries a low-confidence flag; "
+            "neutralizing as a precaution",
+        )
+
+    if source_type in _RETRIEVED_SOURCE_TYPES and any(
+        signal.tier.value == "tier3_llm_judge"
+        and signal.matched_rule == _TIER3_UNAVAILABLE_RULE
+        for signal in signals
+    ):
+        return (
+            Decision.NEUTRALIZE,
+            f"retrieved content ({source_type.value}) could not be verified by the judge; "
             "neutralizing as a precaution",
         )
 

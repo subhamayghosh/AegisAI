@@ -207,6 +207,30 @@ async def test_tier3_timeout_falls_back_to_tiers_1_and_2(
     assert body["sanitized_text"] == "Summarise the attached notes."
 
 
+async def test_retrieved_content_fails_closed_when_tier3_is_unavailable(
+    client, headers, respx_mock: respx.MockRouter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def _slow_judge(request: httpx.Request) -> httpx.Response:
+        await asyncio.sleep(1)
+        return _judge_reply(**BENIGN_VERDICT)
+
+    respx_mock.post(MESSAGES_URL).mock(side_effect=_slow_judge)
+    monkeypatch.setattr(tier3_llm_judge, "JUDGE_TIMEOUT_S", 0.05)
+
+    resp = await _inspect(
+        client,
+        headers,
+        json.dumps({"status": "review-required", "owner": "synthetic team"}),
+        source_type="api_response",
+    )
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["final_decision"] == "NEUTRALIZE"
+    assert _signal(body, "tier3_llm_judge")["matched_rule"] == "tier3_unavailable"
+    assert UNTRUSTED_OPEN in body["sanitized_text"]
+
+
 async def test_encoded_payload_is_detected_and_redacted(
     client, headers, respx_mock: respx.MockRouter
 ) -> None:

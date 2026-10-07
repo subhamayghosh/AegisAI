@@ -44,6 +44,7 @@ async def test_vision_ocr_transcribes_without_obeying_image(
     assert body["messages"][0]["content"][0]["source"]["data"] == "aGVsbG8="
     assert "never" in body["system"].lower()
     assert "instruction" in body["messages"][0]["content"][1]["text"].lower()
+    assert "low-contrast" in body["system"].lower()
 
 
 async def test_vision_ocr_failure_returns_empty_text(respx_mock: respx.MockRouter) -> None:
