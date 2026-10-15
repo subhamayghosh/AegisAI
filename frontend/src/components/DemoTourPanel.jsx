@@ -5,7 +5,7 @@ import { ATTACK_TYPE_LABELS, SOURCE_TYPES } from "../constants";
 const SOURCE_LABELS = Object.fromEntries(SOURCE_TYPES.map((source) => [source.value, source.label]));
 
 function scenarioLabel(scenario) {
-  return ATTACK_TYPE_LABELS[scenario.label] || (scenario.label === "benign" ? "Benign control" : scenario.label);
+  return scenario.title || ATTACK_TYPE_LABELS[scenario.label] || (scenario.label === "benign" ? "Benign control" : scenario.label);
 }
 
 function statusText(status) {
@@ -91,7 +91,7 @@ export default function DemoTourPanel({
                 const item = results[index];
                 const isCurrent = index === currentIndex;
                 return (
-                  <li key={`${scenario.label}-${index}`} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs ${isCurrent ? "bg-cyan-300/15 text-white" : "text-slate-400"}`}>
+                  <li key={scenario.id || `${scenario.label}-${index}`} className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs ${isCurrent ? "bg-cyan-300/15 text-white" : "text-slate-400"}`}>
                     <span className="grid h-4 w-4 shrink-0 place-items-center rounded-full border border-white/15">
                       {item?.response ? <Check size={10} className="text-emerald-300" aria-label="Completed" /> : item?.error ? <X size={10} className="text-rose-300" aria-label="Failed" /> : isCurrent && isRunning ? <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-cyan-200" /> : <Circle size={9} className="text-slate-500" aria-label="Pending" />}
                     </span>
@@ -130,3 +130,4 @@ export default function DemoTourPanel({
 function ArrowLeftIcon() {
   return <span aria-hidden="true">←</span>;
 }
+ 

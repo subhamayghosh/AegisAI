@@ -3,8 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import * as historyApi from "../api/history";
 import DecisionPill from "../components/DecisionPill";
-import SignalCard from "../components/SignalCard";
+import FriendlyResult from "../components/FriendlyResult";
 import { ATTACK_TYPE_LABELS } from "../constants";
+import { sourceLabel } from "../utils/inspectionFeedback";
 
 export default function HistoryDetail() {
   const { id } = useParams();
@@ -59,43 +60,25 @@ export default function HistoryDetail() {
           </span>
         </div>
 
-        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 text-sm md:grid-cols-4">
+        <dl className="mt-4 grid grid-cols-2 gap-x-6 gap-y-4 text-sm md:grid-cols-3">
           <div>
-            <dt className="text-xs text-textMuted">Source type</dt>
-            <dd>{item.source_type}</dd>
-          </div>
-          <div className="col-span-2 md:col-span-2">
-            <dt className="text-xs text-textMuted">Input hash</dt>
-            <dd className="break-all font-mono text-xs leading-relaxed">{item.input_hash}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-textMuted">Latency</dt>
-            <dd>{item.latency_ms_total} ms</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-textMuted">Working model</dt>
-            <dd>{item.working_model_id}</dd>
-          </div>
-          <div>
-            <dt className="text-xs text-textMuted">Judge model</dt>
-            <dd>{item.judge_model_id}</dd>
+            <dt className="text-xs text-textMuted">Content source</dt>
+            <dd>{sourceLabel(item.source_type)}</dd>
           </div>
           {item.session_id && (
             <div>
-              <dt className="text-xs text-textMuted">Session</dt>
+              <dt className="text-xs text-textMuted">Conversation session</dt>
               <dd>
                 <Link
                   to={`/sessions/${item.session_id}`}
-                  className="font-mono text-xs text-primary hover:underline"
+                  className="text-primary hover:underline"
                 >
-                  {item.session_id.slice(0, 8)}…
+                  View session timeline
                 </Link>
               </dd>
             </div>
           )}
         </dl>
-
-        <p className="mt-4 text-sm text-textMuted">{item.reason}</p>
 
         {item.input_text && (
           <details className="mt-4 rounded-card border border-border bg-surfaceAlt p-3">
@@ -104,21 +87,11 @@ export default function HistoryDetail() {
           </details>
         )}
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {item.tier_signals.map((signal, idx) => (
-            <SignalCard key={`${signal.tier}-${idx}`} signal={signal} />
-          ))}
+        <div className="mt-4">
+          <FriendlyResult result={item} sourceType={item.source_type} />
         </div>
-
-        {item.sanitized_text && (
-          <details className="mt-4 rounded-card border border-border bg-surfaceAlt p-3">
-            <summary className="cursor-pointer text-sm font-medium">Sanitized text</summary>
-            <pre className="mt-2 whitespace-pre-wrap text-xs text-textMuted">
-              {item.sanitized_text}
-            </pre>
-          </details>
-        )}
       </div>
     </div>
   );
 }
+ 
