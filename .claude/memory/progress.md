@@ -1,5 +1,5 @@
 # Progress Log
-
+ 
 2026-09-25 12:40  Deepak  Step 1 complete: repo scaffolded — directory tree, CLAUDE.md, skills, agents, rules, .env.example, .gitignore, .gitleaks.toml, .pre-commit-config.yaml, README, LICENSE
 2026-09-25 13:00  Deepak  Step 2 complete: FastAPI skeleton — pyproject.toml, requirements.txt, config.py, logging_.py, schemas.py, main.py, 7 stub API routers; /health test passes (3/3)
 2026-09-25 13:30  Deepak  Step 3 complete: DB layer — base.py (TypeDecorators: GUID/CIText/JSONBText/TZDateTime/IPAddress), session.py, models.py (5 tables + indexes), alembic.ini + env.py, initial migration generated; 8/8 unit tests pass; seed_db.py seeds admin + demo users. Note: bcrypt 5.x incompatible with passlib 1.7.4 — seed and future auth use bcrypt directly.
@@ -69,3 +69,7 @@
 2026-10-06  Codex  Added Outlook-compatible bgcolor attributes to the AegisAI mailer so dark backgrounds survive browser-to-email copy/paste more reliably.
 2026-10-06  Codex  Added docs/deliverables/AEGISAI_ONE_PAGER.md with product metadata, problem/solution narrative, F3/D3 architecture, example results, impact, setup, repository, and contributor details.
 2026-10-06  Codex  Expanded the AegisAI one-pager with audience, operating model, inspection lifecycle, decision matrix, governance controls, evidence, and integration guidance while keeping hackathon framing out of that deliverable only.
+2026-10-07  Codex  Reworked History detail to show the existing plain-language safety verdict and checks, removed the input hash, model IDs, matched rules, and internal reason from the user view, and added frontend regression coverage.
+2026-10-07  Codex  Made all 15 guided replay scenarios distinct in the queue with unique titles, IDs, and payloads; benign controls now show descriptive names instead of repeating "Benign control", with regression coverage.
+2026-10-07  Codex  Redesigned Session detail as a friendly safety journey with a status hero, summary cards, percentage chart, readable turn outcomes, and regression coverage.
+2026-10-07  Codex  Strengthened the Session detail hero with an opaque navy surface and local stacking context so its text remains visible over the ambient network artwork.
